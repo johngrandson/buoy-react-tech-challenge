@@ -53,6 +53,110 @@ describe("LoginApiService", () => {
       );
       expect(result).toEqual(expectedResponse);
     });
+
+    it('should not make duplicate requests when login is called multiple times simultaneously', async () => {
+      const loginRequest: LoginRequestData = {
+        email: 'user@example.com',
+        password: 'password123'
+      };
+      
+      const expectedResponse: LoginResponseData = {
+        access: 'access-token-123',
+        refresh: 'refresh-token-123'
+      };
+      
+      // Mock a slow response to ensure concurrent calls
+      mockFetchPost.mockImplementation(() => 
+        new Promise(resolve => 
+          setTimeout(() => resolve(expectedResponse), 100)
+        )
+      );
+      
+      // Mock localStorage methods
+      jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
+      
+      // Call login multiple times simultaneously
+      const promises = [
+        service.login(loginRequest),
+        service.login(loginRequest),
+        service.login(loginRequest)
+      ];
+      
+      const results = await Promise.all(promises);
+      
+      // All calls should return the same response
+      expect(results[0]).toEqual(expectedResponse);
+      expect(results[1]).toEqual(expectedResponse);
+      expect(results[2]).toEqual(expectedResponse);
+      
+      // But fetchPost should only be called once
+      expect(mockFetchPost).toHaveBeenCalledTimes(1);
+      expect(mockFetchPost).toHaveBeenCalledWith(
+        '/login/',
+        { method: 'POST' },
+        loginRequest
+      );
+      
+      // localStorage should only be called once
+      expect(Storage.prototype.setItem).toHaveBeenCalledTimes(1);
+      expect(Storage.prototype.setItem).toHaveBeenCalledWith(
+        'loginData',
+        JSON.stringify(expectedResponse)
+      );
+    });
+
+    it('should handle concurrent login errors correctly and clear promise cache', async () => {
+      const loginRequest: LoginRequestData = {
+        email: 'invalid@example.com',
+        password: 'wrongpassword'
+      };
+      
+      const loginError = new Error('Invalid credentials');
+      
+      // Mock a slow failing response
+      mockFetchPost.mockImplementation(() => 
+        new Promise((_, reject) => 
+          setTimeout(() => reject(loginError), 100)
+        )
+      );
+      
+      // Call login multiple times simultaneously
+      const promises = [
+        service.login(loginRequest),
+        service.login(loginRequest),
+        service.login(loginRequest)
+      ];
+      
+      // All promises should reject with the same error
+      await Promise.all(promises.map(promise => 
+        expect(promise).rejects.toThrow('Invalid credentials')
+      ));
+      
+      // But fetchPost should only be called once
+      expect(mockFetchPost).toHaveBeenCalledTimes(1);
+      expect(mockFetchPost).toHaveBeenCalledWith(
+        '/login/',
+        { method: 'POST' },
+        loginRequest
+      );
+      
+      // After error, cache should be cleared and new attempt should work
+      const successResponse: LoginResponseData = {
+        access: 'new-access-token',
+        refresh: 'new-refresh-token'
+      };
+      
+      mockFetchPost.mockResolvedValueOnce(successResponse);
+      jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
+      
+      const retryResult = await service.login({
+        email: 'valid@example.com',
+        password: 'correctpassword'
+      });
+      
+      expect(retryResult).toEqual(successResponse);
+      expect(mockFetchPost).toHaveBeenCalledTimes(2); // First failed, second succeeded
+    });
   });
 
   describe("getValidToken", () => {
