@@ -246,6 +246,62 @@ describe("LoginApiService", () => {
       // localStorage should only be called once
       expect(Storage.prototype.setItem).toHaveBeenCalledTimes(1);
     });
+
+    it('should not cache login requests with different credentials', async () => {
+      const firstLoginRequest: LoginRequestData = {
+        email: 'user1@example.com',
+        password: 'password1'
+      };
+      
+      const secondLoginRequest: LoginRequestData = {
+        email: 'user2@example.com',
+        password: 'password2'
+      };
+      
+      const firstLoginResponse: LoginResponseData = {
+        access: 'user1-access-token',
+        refresh: 'user1-refresh-token'
+      };
+      
+      const secondLoginResponse: LoginResponseData = {
+        access: 'user2-access-token',
+        refresh: 'user2-refresh-token'
+      };
+      
+      // Mock slow responses to test concurrent behavior
+      mockFetchPost
+        .mockImplementationOnce(() => 
+          new Promise(resolve => 
+            setTimeout(() => resolve(firstLoginResponse), 50)
+          )
+        )
+        .mockImplementationOnce(() => 
+          new Promise(resolve => 
+            setTimeout(() => resolve(secondLoginResponse), 50)
+          )
+        );
+      
+      jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
+      
+      // Make concurrent calls with different credentials
+      const firstCall = service.login(firstLoginRequest);
+      await new Promise(resolve => setTimeout(resolve, 10)); // Small delay
+      const secondCall = service.login(secondLoginRequest);
+      
+      const results = await Promise.all([firstCall, secondCall]);
+      
+      // Should return different responses for different credentials
+      expect(results[0]).toEqual(firstLoginResponse);
+      expect(results[1]).toEqual(secondLoginResponse);
+      
+      // Should make separate API calls for different credentials (no caching)
+      expect(mockFetchPost).toHaveBeenCalledTimes(2);
+      expect(mockFetchPost).toHaveBeenNthCalledWith(1, '/login/', { method: 'POST' }, firstLoginRequest);
+      expect(mockFetchPost).toHaveBeenNthCalledWith(2, '/login/', { method: 'POST' }, secondLoginRequest);
+      
+      // localStorage should be called twice (once for each user)
+      expect(Storage.prototype.setItem).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe("getValidToken", () => {
