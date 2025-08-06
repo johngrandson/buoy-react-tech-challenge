@@ -157,6 +157,52 @@ describe("LoginApiService", () => {
       expect(retryResult).toEqual(successResponse);
       expect(mockFetchPost).toHaveBeenCalledTimes(2); // First failed, second succeeded
     });
+
+    it('should allow new login after logout without cache interference', async () => {
+      // First login
+      const firstLoginRequest: LoginRequestData = {
+        email: 'user1@example.com',
+        password: 'password1'
+      };
+      
+      const firstLoginResponse: LoginResponseData = {
+        access: 'first-access-token',
+        refresh: 'first-refresh-token'
+      };
+      
+      mockFetchPost.mockResolvedValueOnce(firstLoginResponse);
+      jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
+      jest.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {});
+      
+      const firstResult = await service.login(firstLoginRequest);
+      expect(firstResult).toEqual(firstLoginResponse);
+      expect(mockFetchPost).toHaveBeenCalledTimes(1);
+      
+      // Logout
+      service.logout();
+      expect(Storage.prototype.removeItem).toHaveBeenCalledWith('loginData');
+      
+      // Second login with different credentials
+      const secondLoginRequest: LoginRequestData = {
+        email: 'user2@example.com',
+        password: 'password2'
+      };
+      
+      const secondLoginResponse: LoginResponseData = {
+        access: 'second-access-token',
+        refresh: 'second-refresh-token'
+      };
+      
+      mockFetchPost.mockResolvedValueOnce(secondLoginResponse);
+      
+      const secondResult = await service.login(secondLoginRequest);
+      expect(secondResult).toEqual(secondLoginResponse);
+      
+      // Should have made 2 separate API calls (no cache interference)
+      expect(mockFetchPost).toHaveBeenCalledTimes(2);
+      expect(mockFetchPost).toHaveBeenNthCalledWith(1, '/login/', { method: 'POST' }, firstLoginRequest);
+      expect(mockFetchPost).toHaveBeenNthCalledWith(2, '/login/', { method: 'POST' }, secondLoginRequest);
+    });
   });
 
   describe("getValidToken", () => {
