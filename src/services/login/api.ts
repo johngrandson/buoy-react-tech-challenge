@@ -5,13 +5,40 @@ const ONE_MINUTE_IN_SECONDS = 60;
 export class LoginApiService extends LoginService {
   // Stores the refresh promise to prevent concurrent refresh requests
   private refreshPromise: Promise<LoginResponseData | null> | null = null;
+  // Stores the login promise to prevent concurrent login requests
+  private loginPromise: Promise<LoginResponseData> | null = null;
 
   /**
    * Authenticates a user with email and password
+   * Prevents concurrent requests using promise caching
    * @param payload - The login credentials
    * @returns The authentication tokens (access and refresh)
    */
   public async login(payload: LoginRequestData): Promise<LoginResponseData> {
+    // If a login request is already in progress, return the same promise
+    if (this.loginPromise) {
+      return this.loginPromise;
+    }
+
+    // Create and store the login promise
+    this.loginPromise = this.doLogin(payload);
+    
+    try {
+      // Wait for the login to complete
+      const result = await this.loginPromise;
+      return result;
+    } finally {
+      // Clear the promise after completion (success or failure)
+      this.loginPromise = null;
+    }
+  }
+
+  /**
+   * Performs the actual login operation
+   * @param payload - The login credentials
+   * @returns The authentication tokens
+   */
+  private async doLogin(payload: LoginRequestData): Promise<LoginResponseData> {
     const response: LoginResponseData = await this.fetchPost(
       "/login/",
       { method: "POST" },
@@ -62,7 +89,7 @@ export class LoginApiService extends LoginService {
 
         // Create and store the refresh promise
         this.refreshPromise = this.doRefresh(token.refresh);
-        
+
         try {
           // Wait for the refresh to complete
           const result = await this.refreshPromise;
@@ -85,7 +112,9 @@ export class LoginApiService extends LoginService {
    * @param refreshToken - The refresh token to use
    * @returns The new token or null if refresh fails
    */
-  private async doRefresh(refreshToken: string): Promise<LoginResponseData | null> {
+  private async doRefresh(
+    refreshToken: string
+  ): Promise<LoginResponseData | null> {
     try {
       const response: LoginResponseData = await this.fetchPost(
         "/refresh/",
