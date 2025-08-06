@@ -1,5 +1,7 @@
 import { LoginService, LoginRequestData, LoginResponseData } from "./interface";
 
+const ONE_MINUTE_IN_SECONDS = 60;
+
 export class LoginApiService extends LoginService {
   public async login(payload: LoginRequestData): Promise<LoginResponseData> {
     const response: LoginResponseData = await this.fetchPost(
@@ -23,28 +25,30 @@ export class LoginApiService extends LoginService {
 
   public async getValidToken(): Promise<LoginResponseData | null> {
     const token = await this.getCurrentToken();
-    if (!token || !token.access) {
+    if (!token || !token.access || !token.refresh) {
       this.logout();
       return null;
     }
 
     try {
       const parsedToken = this.parseJwt(token?.access);
+      const currentTime = Math.floor(Date.now() / 1000);
 
-      if (new Date().getTime() / 1000 > parsedToken.exp) {
+      if (currentTime >= parsedToken.exp - ONE_MINUTE_IN_SECONDS) {
         const response: LoginResponseData = await this.fetchPost(
           "/refresh/",
           { method: "POST" },
           { refresh: token.refresh }
         );
         this.storeInLocalStorage(response);
+        return response;
       }
-      return this.retrieveFromLocalStorage();
+      return token;
     } catch (e) {
       console.log(e);
       this.logout();
+      return null;
     }
-    return null;
   }
 
   private loginDataKey = "loginData";
