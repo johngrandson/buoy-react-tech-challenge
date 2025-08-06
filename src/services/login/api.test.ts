@@ -203,6 +203,49 @@ describe("LoginApiService", () => {
       expect(mockFetchPost).toHaveBeenNthCalledWith(1, '/login/', { method: 'POST' }, firstLoginRequest);
       expect(mockFetchPost).toHaveBeenNthCalledWith(2, '/login/', { method: 'POST' }, secondLoginRequest);
     });
+
+    it('should handle rapid sequential login attempts correctly', async () => {
+      const loginRequest: LoginRequestData = {
+        email: 'rapid@example.com',
+        password: 'password123'
+      };
+      
+      const loginResponse: LoginResponseData = {
+        access: 'rapid-access-token',
+        refresh: 'rapid-refresh-token'
+      };
+      
+      // Mock slower responses (50ms each) to ensure overlap
+      mockFetchPost.mockImplementation(() => 
+        new Promise(resolve => 
+          setTimeout(() => resolve(loginResponse), 50)
+        )
+      );
+      
+      jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
+      
+      // Make rapid sequential calls with minimal delay
+      const firstCall = service.login(loginRequest);
+      await new Promise(resolve => setTimeout(resolve, 10)); // Wait 10ms (still within 50ms API call)
+      const secondCall = service.login(loginRequest);
+      await new Promise(resolve => setTimeout(resolve, 10)); // Wait 10ms (still within API call)
+      const thirdCall = service.login(loginRequest);
+      
+      const results = await Promise.all([firstCall, secondCall, thirdCall]);
+      
+      // All should return the same response
+      expect(results[0]).toEqual(loginResponse);
+      expect(results[1]).toEqual(loginResponse);
+      expect(results[2]).toEqual(loginResponse);
+      
+      // Only the first request should have triggered an API call
+      // The second and third should have reused the cached promise
+      expect(mockFetchPost).toHaveBeenCalledTimes(1);
+      expect(mockFetchPost).toHaveBeenCalledWith('/login/', { method: 'POST' }, loginRequest);
+      
+      // localStorage should only be called once
+      expect(Storage.prototype.setItem).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe("getValidToken", () => {
