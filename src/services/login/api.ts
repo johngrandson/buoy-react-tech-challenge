@@ -7,18 +7,27 @@ export class LoginApiService extends LoginService {
   private refreshPromise: Promise<LoginResponseData | null> | null = null;
   // Stores the login promise to prevent concurrent login requests
   private loginPromise: Promise<LoginResponseData> | null = null;
+  // Stores the current credentials key to ensure safe caching
+  private currentCredentialsKey: string | null = null;
 
   /**
    * Authenticates a user with email and password
-   * Prevents concurrent requests using promise caching
+   * Prevents concurrent requests using promise caching with credential-based keys
    * @param payload - The login credentials
    * @returns The authentication tokens (access and refresh)
    */
   public async login(payload: LoginRequestData): Promise<LoginResponseData> {
-    // If a login request is already in progress, return the same promise
-    if (this.loginPromise) {
+    // Create a unique key based on credentials for safe caching
+    const credentialsKey = `${payload.email}:${payload.password}`;
+    
+    // If a login request with the same credentials is already in progress, return the same promise
+    if (this.loginPromise && this.currentCredentialsKey === credentialsKey) {
       return this.loginPromise;
     }
+
+    // Clear any existing promise for different credentials
+    this.loginPromise = null;
+    this.currentCredentialsKey = credentialsKey;
 
     // Create and store the login promise
     this.loginPromise = this.doLogin(payload);
@@ -30,6 +39,7 @@ export class LoginApiService extends LoginService {
     } finally {
       // Clear the promise after completion (success or failure)
       this.loginPromise = null;
+      this.currentCredentialsKey = null;
     }
   }
 
