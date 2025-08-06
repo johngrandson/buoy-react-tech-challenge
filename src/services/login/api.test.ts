@@ -6,6 +6,8 @@ type LoginApiServiceWithProtected = LoginApiService & {
   fetchPost: LoginApiService["fetchPost"];
 };
 
+const expiredTokenTime = 1650000000000;
+
 describe("LoginApiService", () => {
   let service: LoginApiService;
   let mockFetchPost: jest.Mock;
@@ -55,8 +57,6 @@ describe("LoginApiService", () => {
 
   describe("getValidToken", () => {
     it("should only refresh token once when called multiple times simultaneously", async () => {
-      const expiredTokenTime = 1650000000000;
-
       // Create an expired token
       const expiredToken: LoginResponseData = {
         access:
@@ -99,6 +99,90 @@ describe("LoginApiService", () => {
       // But fetchPost should only be called once
       expect(mockFetchPost).toHaveBeenCalledTimes(1);
       expect(mockFetchPost).toHaveBeenCalledWith(
+        "/refresh/",
+        { method: "POST" },
+        { refresh: "refresh-token" }
+      );
+    });
+
+    it("should handle multiple service instances with independent promise caching", async () => {
+      // Create two separate service instances
+      const service1 = new LoginApiService();
+      const service2 = new LoginApiService();
+
+      // Mock fetchPost for both services
+      const mockFetchPost1 = jest.fn();
+      const mockFetchPost2 = jest.fn();
+
+      const serviceWithProtected1 = service1 as LoginApiServiceWithProtected;
+      const serviceWithProtected2 = service2 as LoginApiServiceWithProtected;
+
+      jest
+        .spyOn(serviceWithProtected1, "fetchPost")
+        .mockImplementation(mockFetchPost1);
+      jest
+        .spyOn(serviceWithProtected2, "fetchPost")
+        .mockImplementation(mockFetchPost2);
+
+      // Expired token
+      const expiredToken: LoginResponseData = {
+        access:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MDAwMDAwMDAsInN1YiI6InVzZXIxIn0=.signature",
+        refresh: "refresh-token",
+      };
+
+      // New tokens for each service
+      const newToken1: LoginResponseData = {
+        access:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDAwMDAwMDAsInN1YiI6InVzZXIxIn0=.signature",
+        refresh: "service1-new-refresh-token",
+      };
+
+      const newToken2: LoginResponseData = {
+        access:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDAwMDAwMDAsInN1YiI6InVzZXIyIn0=.signature",
+        refresh: "service2-new-refresh-token",
+      };
+
+      // Mock localStorage to return expired token
+      jest
+        .spyOn(Storage.prototype, "getItem")
+        .mockReturnValue(JSON.stringify(expiredToken));
+      jest.spyOn(Storage.prototype, "setItem").mockImplementation(() => {});
+      jest.spyOn(Date, "now").mockReturnValue(expiredTokenTime);
+
+      // Mock refresh responses - each service gets different tokens
+      mockFetchPost1.mockResolvedValueOnce(newToken1);
+      mockFetchPost2.mockResolvedValueOnce(newToken2);
+
+      // Call getValidToken for both services simultaneously
+      const promises = [
+        service1.getValidToken(),
+        service1.getValidToken(), // Should reuse service1's promise
+        service2.getValidToken(),
+        service2.getValidToken(), // Should reuse service2's promise
+      ];
+
+      const results = await Promise.all(promises);
+
+      // Service1 calls should return service1's new token
+      expect(results[0]).toEqual(newToken1);
+      expect(results[1]).toEqual(newToken1);
+
+      // Service2 calls should return service2's new token
+      expect(results[2]).toEqual(newToken2);
+      expect(results[3]).toEqual(newToken2);
+
+      // Each service should only make one refresh call
+      expect(mockFetchPost1).toHaveBeenCalledTimes(1);
+      expect(mockFetchPost1).toHaveBeenCalledWith(
+        "/refresh/",
+        { method: "POST" },
+        { refresh: "refresh-token" }
+      );
+
+      expect(mockFetchPost2).toHaveBeenCalledTimes(1);
+      expect(mockFetchPost2).toHaveBeenCalledWith(
         "/refresh/",
         { method: "POST" },
         { refresh: "refresh-token" }
