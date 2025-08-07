@@ -75,7 +75,26 @@ In a production environment, with a proper JWT generating API, and a proper JWT 
 
 Provide an answer below:
 
-> DELETE THIS QUOTE AND REPLACE IT WITH YOUR ANSWER
+### When dealing with real world applications, with a large amount of users, parallel requests can be a problem due to the following reasons:
+
+- Increased load on the server
+- Increased response time for each request, causing a delay in the user experience
+- Unnecessary use of resources, as the server is processing the same request multiple times
+
+Let's discuss about some security issues that can be caused by this scenario:
+
+- Attack amplification: If an attacker is able to identify the client is making multiple requests to the same endpoint, they can perform a DDoS attack, forcing the server to process the same request multiple times, amplifying the attack.
+- Serverless architecture: If the server is built over serverless architecture, the impact will be directly in the cost of the server, as each request will be processed multiple times.
+- DB lock exploitation: Endpoints that perform write operations can be exploited to generate intentional deadlocks, causing the server to be unresponsive.
+- Difficult to debug: Duplicated requests will be a challenge to debug, as the issues will be duplicated in the logs.
+
+### How to solve this issue?
+
+The proposed solution used in this challenge is to use a promise caching to store the calls to the endpoints, and only make the call to the endpoint if it is not already cached.
+
+Since this is a client side application issue, the cache will be lost when the user refreshes the page, but will make sure each client will have its own cache, so it is easily scalable.
+
+The current implementation is a simple promise caching, but without the complexity of adding a real cache, it wont be a overengineering solution and will be easier to maintain.
 
 ---
 
