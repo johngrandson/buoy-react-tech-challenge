@@ -1,7 +1,8 @@
 import { LoginApiService } from "services/login/api";
 import { ApiService } from "./apiService";
 
-const loginService = new LoginApiService();
+// Use the singleton instance to ensure consistency with other parts of the app
+const loginService = LoginApiService.getInstance();
 
 export class AuthedService extends ApiService {
   static apiUrl: string = `${process.env.REACT_APP_API_URL}`;

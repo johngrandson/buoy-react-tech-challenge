@@ -1,8 +1,29 @@
 import { UserProfileData, UserProfileService } from "./interface";
 
 export class UserProfileApiService extends UserProfileService {
-  // Stores the getMyUser promise to prevent concurrent requests
-  private getMyUserPromise: Promise<UserProfileData | undefined> | null = null;
+  // Singleton instance to ensure consistent promise caching across the application
+  private static instance: UserProfileApiService | null = null;
+
+  // Promise cache to prevent concurrent duplicate requests
+  private requestCache: Map<string, Promise<any>> = new Map();
+
+  /**
+   * Gets the singleton instance of UserProfileApiService
+   * This ensures promise caching works consistently across all API calls
+   */
+  public static getInstance(): UserProfileApiService {
+    if (!UserProfileApiService.instance) {
+      UserProfileApiService.instance = new UserProfileApiService();
+    }
+    return UserProfileApiService.instance;
+  }
+
+  /**
+   * Resets the singleton instance (useful for testing)
+   */
+  public static resetInstance(): void {
+    UserProfileApiService.instance = null;
+  }
 
   /**
    * Gets the current user's profile data
@@ -10,22 +31,20 @@ export class UserProfileApiService extends UserProfileService {
    * @returns The user profile data or undefined if not found
    */
   async getMyUser(): Promise<UserProfileData | undefined> {
-    // If a request is already in progress, return the same promise
-    if (this.getMyUserPromise) {
-      return this.getMyUserPromise;
+    const cacheKey = "getMyUser";
+
+    // Check if request is already in progress
+    if (this.requestCache.has(cacheKey)) {
+      return this.requestCache.get(cacheKey);
     }
 
-    // Create and store the request promise
-    this.getMyUserPromise = this.doGetMyUser();
+    // Create and cache the request promise
+    const requestPromise = this.doGetMyUser();
+    this.requestCache.set(cacheKey, requestPromise);
 
-    try {
-      // Wait for the request to complete
-      const result = await this.getMyUserPromise;
-      return result;
-    } finally {
-      // Clear the promise after completion (success or failure)
-      this.getMyUserPromise = null;
-    }
+    // Don't auto-cleanup - let natural cache invalidation handle it
+    // The cache will be cleared when a new request is needed or on logout
+    return requestPromise;
   }
 
   /**

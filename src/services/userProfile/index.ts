@@ -2,7 +2,7 @@ import { UserProfileFakeService } from "./fake";
 import { UserProfileApiService } from "./api";
 import { UserProfileService } from "./interface";
 
-let service: UserProfileService = new UserProfileApiService();
+let service: UserProfileService = UserProfileApiService.getInstance();
 
 if (process.env.REACT_APP_FAKE_API_MODE === "true") {
   service = new UserProfileFakeService(1000, 0);

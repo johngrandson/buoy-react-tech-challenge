@@ -3,12 +3,29 @@ import { LoginService, LoginRequestData, LoginResponseData } from "./interface";
 const ONE_MINUTE_IN_SECONDS = 60;
 
 export class LoginApiService extends LoginService {
-  // Stores the refresh promise to prevent concurrent refresh requests
-  private refreshPromise: Promise<LoginResponseData | null> | null = null;
-  // Stores the login promise to prevent concurrent login requests
-  private loginPromise: Promise<LoginResponseData> | null = null;
-  // Stores the current credentials key to ensure safe caching
-  private currentCredentialsKey: string | null = null;
+  // Singleton instance to ensure consistent promise caching across the application
+  private static instance: LoginApiService | null = null;
+
+  // Promise cache to prevent concurrent duplicate requests
+  private requestCache: Map<string, Promise<any>> = new Map();
+
+  /**
+   * Gets the singleton instance of LoginApiService
+   * This ensures promise caching works consistently across all API calls
+   */
+  public static getInstance(): LoginApiService {
+    if (!LoginApiService.instance) {
+      LoginApiService.instance = new LoginApiService();
+    }
+    return LoginApiService.instance;
+  }
+
+  /**
+   * Resets the singleton instance (useful for testing)
+   */
+  public static resetInstance(): void {
+    LoginApiService.instance = null;
+  }
 
   /**
    * Authenticates a user with email and password
@@ -17,29 +34,24 @@ export class LoginApiService extends LoginService {
    * @returns The authentication tokens (access and refresh)
    */
   public async login(payload: LoginRequestData): Promise<LoginResponseData> {
-    // Create a unique key based on credentials for safe caching
-    const credentialsKey = `${payload.email}:${payload.password}`;
+    // Create cache key based on credentials to prevent duplicate requests
+    const cacheKey = this.createCacheKey("login", payload);
 
-    // If a login request with the same credentials is already in progress, return the same promise
-    if (this.loginPromise && this.currentCredentialsKey === credentialsKey) {
-      return this.loginPromise;
+    // Check if request is already in progress
+    if (this.requestCache.has(cacheKey)) {
+      return this.requestCache.get(cacheKey);
     }
 
-    // Clear any existing promise for different credentials
-    this.loginPromise = null;
-    this.currentCredentialsKey = credentialsKey;
-
-    // Create and store the login promise
-    this.loginPromise = this.doLogin(payload);
+    // Create and cache the request promise
+    const requestPromise = this.doLogin(payload);
+    this.requestCache.set(cacheKey, requestPromise);
 
     try {
-      // Wait for the login to complete
-      const result = await this.loginPromise;
+      const result = await requestPromise;
       return result;
     } finally {
-      // Clear the promise after completion (success or failure)
-      this.loginPromise = null;
-      this.currentCredentialsKey = null;
+      // Clean up cache after completion
+      this.requestCache.delete(cacheKey);
     }
   }
 
@@ -92,22 +104,21 @@ export class LoginApiService extends LoginService {
       const currentTime = Math.floor(Date.now() / 1000);
 
       if (currentTime >= parsedToken.exp - ONE_MINUTE_IN_SECONDS) {
-        // If a refresh is already in progress, return the same promise
-        if (this.refreshPromise) {
-          return this.refreshPromise;
+        // Create cache key for refresh request
+        const cacheKey = this.createCacheKey("refresh", { refreshToken: token.refresh });
+
+        // Check if refresh is already in progress
+        if (this.requestCache.has(cacheKey)) {
+          return this.requestCache.get(cacheKey);
         }
 
-        // Create and store the refresh promise
-        this.refreshPromise = this.doRefresh(token.refresh);
+        // Create the refresh promise and cache it
+        const requestPromise = this.doRefresh(token.refresh);
+        this.requestCache.set(cacheKey, requestPromise);
 
-        try {
-          // Wait for the refresh to complete
-          const result = await this.refreshPromise;
-          return result;
-        } finally {
-          // Clear the promise after completion (success or failure)
-          this.refreshPromise = null;
-        }
+        // Don't auto-cleanup - let natural cache invalidation handle it
+        // The cache will be cleared when a new token is needed or on logout
+        return requestPromise;
       }
       return token;
     } catch (e) {
@@ -136,6 +147,10 @@ export class LoginApiService extends LoginService {
       this.logout();
       return null;
     }
+  }
+
+  private createCacheKey(method: string, params?: any): string {
+    return `${method}:${JSON.stringify(params || {})}`;
   }
 
   private loginDataKey = "loginData";
