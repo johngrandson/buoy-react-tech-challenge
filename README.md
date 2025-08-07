@@ -148,6 +148,18 @@ Reference:
 
 ### Comments and extra points
 
+### Users Page: Pagination Implementation Note
+
+The current Users page implementation uses client-side pagination with a limited dataset (first 100 users from the API) then dynamically adjusts the page size based on the total number of users.
+While this approach works, **a better production approach would be server-side pagination (SSR)** where:
+
+- The page state controls which page of data to fetch from the API
+- Navigation between pages triggers new API calls with `limit` and `skip` parameters  
+- This allows users to browse through all available users without overfetching data
+- Better performance and scalability for large datasets
+
+The current implementation prioritizes simplicity but should be enhanced with proper server-side pagination for better performance and scalability.
+
 ### Architectural Approach: Feature-Based Domain-Driven Design
 
 Based on my last experiences with other projects, when I want to build an application that will need to scale in terms of performance and team collaboration, I follow a Domain-Driven Design (DDD) approach adapted for frontend development, organizing code by business features rather than technical layers.
