@@ -29,7 +29,7 @@ export const SelectBrandModal = ({
     <Modal open={open} onCancel={closeModal} title={"Marcas"} footer={null}>
       <Input
         placeholder="Buscar..."
-        onChange={(e) => onSearch(e.target.value)}
+        onChange={e => onSearch(e.target.value)}
         style={
           hasFocus || hasMouseOver
             ? undefined
@@ -74,12 +74,9 @@ export const SelectBrandModal = ({
           className="scrollableDiv"
           style={{ width: "100%", marginTop: 10, marginBottom: 10 }}
         >
-          {brandList.map((brandData) => (
+          {brandList.map(brandData => (
             <Col key={brandData.id} span={24}>
-              <BrandItem
-                {...brandData}
-                onClick={() => handleSelection(brandData.id)}
-              />
+              <BrandItem {...brandData} onClick={() => handleSelection(brandData.id)} />
             </Col>
           ))}
         </Row>

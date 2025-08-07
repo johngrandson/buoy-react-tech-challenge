@@ -13,9 +13,7 @@ jest.mock("hooks", () => ({
   useGetBrandId: jest.fn(),
 }));
 
-const mockUseGetBrandId = useGetBrandId as jest.MockedFunction<
-  typeof useGetBrandId
->;
+const mockUseGetBrandId = useGetBrandId as jest.MockedFunction<typeof useGetBrandId>;
 
 function createTestWrapper() {
   const queryClient = new QueryClient({
@@ -83,7 +81,7 @@ describe("useBrandIdSubscribedQuery", () => {
 
     // Arrange: Initial setup
     mockUseGetBrandId.mockReturnValue("brand123");
-    mockQueryKeyBuilder.mockImplementation((brandId) => ["brands", brandId]);
+    mockQueryKeyBuilder.mockImplementation(brandId => ["brands", brandId]);
     mockHandler.mockResolvedValue({ id: 1, name: "Brand 123" });
 
     // Act: Render the hook

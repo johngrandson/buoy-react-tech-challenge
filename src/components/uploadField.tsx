@@ -16,13 +16,7 @@ export const getBase64 = (img: any, callback: (url: string) => void) => {
   reader.readAsDataURL(img);
 };
 
-const UploadField = ({
-  initialValue,
-  children,
-  width,
-  height,
-  onChange,
-}: UploadFieldProps) => {
+const UploadField = ({ initialValue, children, width, height, onChange }: UploadFieldProps) => {
   const {
     token: { borderRadius, paddingXXS },
   } = theme.useToken();
@@ -34,7 +28,7 @@ const UploadField = ({
   }, []);
 
   const handleChange = (info: any) => {
-    getBase64(info.file as any, (url) => onChange && onChange(url));
+    getBase64(info.file as any, url => onChange && onChange(url));
   };
 
   return (
@@ -66,7 +60,7 @@ const UploadField = ({
             width={width}
             height={height}
             style={{ objectFit: "contain" }}
-            onClick={(e) => e.stopPropagation()}
+            onClick={e => e.stopPropagation()}
             onMouseMove={() => setHovering(true)}
             onMouseOut={() => setHovering(false)}
           ></Image>

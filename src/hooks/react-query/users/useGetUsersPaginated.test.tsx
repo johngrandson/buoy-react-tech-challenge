@@ -15,11 +15,9 @@ const createWrapper = () => {
       },
     },
   });
-  
+
   return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 };
 
@@ -37,7 +35,15 @@ describe("useGetUsersPaginated", () => {
 
   it("should fetch users with correct pagination parameters", async () => {
     const mockResponse = {
-      users: [{ id: 1, firstName: "John", lastName: "Doe", email: "john@example.com", image: "image.jpg" }],
+      users: [
+        {
+          id: 1,
+          firstName: "John",
+          lastName: "Doe",
+          email: "john@example.com",
+          image: "image.jpg",
+        },
+      ],
       total: 100,
       skip: 0,
       limit: 13,
@@ -45,10 +51,9 @@ describe("useGetUsersPaginated", () => {
 
     mockUsersService.getAll.mockResolvedValue(mockResponse);
 
-    const { result } = renderHook(
-      () => useGetUsersPaginated({ page: 1, pageSize: 13 }),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useGetUsersPaginated({ page: 1, pageSize: 13 }), {
+      wrapper: createWrapper(),
+    });
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
@@ -68,10 +73,9 @@ describe("useGetUsersPaginated", () => {
 
     mockUsersService.getAll.mockResolvedValue(mockResponse);
 
-    const { result } = renderHook(
-      () => useGetUsersPaginated({ page: 3, pageSize: 13 }),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useGetUsersPaginated({ page: 3, pageSize: 13 }), {
+      wrapper: createWrapper(),
+    });
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
@@ -86,10 +90,9 @@ describe("useGetUsersPaginated", () => {
     const mockError = new Error("API Error");
     mockUsersService.getAll.mockRejectedValue(mockError);
 
-    const { result } = renderHook(
-      () => useGetUsersPaginated({ page: 1 }),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useGetUsersPaginated({ page: 1 }), {
+      wrapper: createWrapper(),
+    });
 
     await waitFor(() => {
       expect(result.current.isError).toBe(true);
@@ -108,10 +111,9 @@ describe("useGetUsersPaginated", () => {
 
     mockUsersService.getAll.mockResolvedValue(mockResponse);
 
-    const { result } = renderHook(
-      () => useGetUsersPaginated({ page: 1 }),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useGetUsersPaginated({ page: 1 }), {
+      wrapper: createWrapper(),
+    });
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);

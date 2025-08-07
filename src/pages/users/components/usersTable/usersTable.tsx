@@ -8,7 +8,11 @@ interface UsersTableProps extends Omit<TableProps<User>, "columns" | "dataSource
   loading?: boolean;
 }
 
-export const UsersTable = memo<UsersTableProps>(function UsersTable({ users, loading, ...tableProps }) {
+export const UsersTable = memo<UsersTableProps>(function UsersTable({
+  users,
+  loading,
+  ...tableProps
+}) {
   const [filterResetKey, setFilterResetKey] = useState(0);
   const [hasActiveFilters, setHasActiveFilters] = useState(false);
 
@@ -21,7 +25,7 @@ export const UsersTable = memo<UsersTableProps>(function UsersTable({ users, loa
   const handleFilterChange = useCallback((_pagination: any, filters: any) => {
     // Check if any filter has values
     const hasFilters = Object.values(filters).some(
-      (filterValue) => filterValue && (filterValue as string[]).length > 0
+      filterValue => filterValue && (filterValue as string[]).length > 0
     );
     setHasActiveFilters(hasFilters);
   }, []);
@@ -32,9 +36,7 @@ export const UsersTable = memo<UsersTableProps>(function UsersTable({ users, loa
     <>
       {hasActiveFilters && (
         <div style={{ marginBottom: 16 }}>
-          <Button onClick={handleClearAllFilters}>
-            Clear All Filters
-          </Button>
+          <Button onClick={handleClearAllFilters}>Clear All Filters</Button>
         </div>
       )}
       <Table<User>
@@ -46,8 +48,7 @@ export const UsersTable = memo<UsersTableProps>(function UsersTable({ users, loa
         pagination={{
           pageSize: 13,
           showSizeChanger: false,
-          showTotal: (total, range) => 
-            `${range[0]}-${range[1]} of ${total} users`,
+          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} users`,
         }}
         scroll={{ x: 1200 }}
         onChange={handleFilterChange}

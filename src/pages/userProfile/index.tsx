@@ -1,16 +1,6 @@
 import { useIntl } from "react-intl";
 import { InboxOutlined } from "@ant-design/icons";
-import {
-  Card,
-  Col,
-  Row,
-  Space,
-  Form,
-  Input,
-  Typography,
-  Button,
-  Spin,
-} from "antd";
+import { Card, Col, Row, Space, Form, Input, Typography, Button, Spin } from "antd";
 
 import UploadField from "components/uploadField";
 import { useUserCRUD } from "hooks/react-query/user";
@@ -20,7 +10,7 @@ export function UserProfile() {
   const { formatMessage } = useIntl();
 
   const { useGetDetail, useUpdate } = useUserCRUD();
-  const { data, isSuccess, isLoading, isError } = useGetDetail();
+  const { data, isSuccess, isLoading } = useGetDetail();
   const { mutateAsync, isLoading: updateIsLoading } = useUpdate(data?.id);
 
   const handleOnFinish = (values: Record<string, string>) => {
@@ -31,11 +21,7 @@ export function UserProfile() {
     <ContentLayout>
       {isLoading && <Spin />}
       {!isLoading && isSuccess && data && (
-        <Form
-          disabled={updateIsLoading}
-          initialValues={data}
-          onFinish={handleOnFinish}
-        >
+        <Form disabled={updateIsLoading} initialValues={data} onFinish={handleOnFinish}>
           <Row justify="space-around" gutter={[0, 20]}>
             <Col span={24}>
               <Card
@@ -81,11 +67,7 @@ export function UserProfile() {
                     name={"avatar"}
                     noStyle
                   >
-                    <UploadField
-                      initialValue={data.avatar}
-                      width={"240px"}
-                      height={"132px"}
-                    >
+                    <UploadField initialValue={data.avatar} width={"240px"} height={"132px"}>
                       <>
                         <p className="ant-upload-drag-icon">
                           <InboxOutlined />

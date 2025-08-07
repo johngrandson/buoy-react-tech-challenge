@@ -19,7 +19,7 @@ export class LoginApiService extends LoginService {
   public async login(payload: LoginRequestData): Promise<LoginResponseData> {
     // Create a unique key based on credentials for safe caching
     const credentialsKey = `${payload.email}:${payload.password}`;
-    
+
     // If a login request with the same credentials is already in progress, return the same promise
     if (this.loginPromise && this.currentCredentialsKey === credentialsKey) {
       return this.loginPromise;
@@ -31,7 +31,7 @@ export class LoginApiService extends LoginService {
 
     // Create and store the login promise
     this.loginPromise = this.doLogin(payload);
-    
+
     try {
       // Wait for the login to complete
       const result = await this.loginPromise;
@@ -122,9 +122,7 @@ export class LoginApiService extends LoginService {
    * @param refreshToken - The refresh token to use
    * @returns The new token or null if refresh fails
    */
-  private async doRefresh(
-    refreshToken: string
-  ): Promise<LoginResponseData | null> {
+  private async doRefresh(refreshToken: string): Promise<LoginResponseData | null> {
     try {
       const response: LoginResponseData = await this.fetchPost(
         "/refresh/",

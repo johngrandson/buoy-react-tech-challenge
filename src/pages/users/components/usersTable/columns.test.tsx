@@ -32,9 +32,15 @@ describe("useUsersTableColumns", () => {
     const { result } = renderHook(() => useUsersTableColumns());
     const columns = result.current;
     const firstNameColumn = columns.find(col => col.key === "firstName");
-    
-    const testUser = { id: 4, firstName: "Miles", lastName: "Cummerata", email: "test@test.com", image: "test.jpg" };
-    
+
+    const testUser = {
+      id: 4,
+      firstName: "Miles",
+      lastName: "Cummerata",
+      email: "test@test.com",
+      image: "test.jpg",
+    };
+
     expect(firstNameColumn?.onFilter?.("miles", testUser)).toBe(true);
     expect(firstNameColumn?.onFilter?.("john", testUser)).toBe(false);
   });
@@ -43,9 +49,15 @@ describe("useUsersTableColumns", () => {
     const { result } = renderHook(() => useUsersTableColumns());
     const columns = result.current;
     const lastNameColumn = columns.find(col => col.key === "lastName");
-    
-    const testUser = { id: 4, firstName: "Miles", lastName: "Cummerata", email: "test@test.com", image: "test.jpg" };
-    
+
+    const testUser = {
+      id: 4,
+      firstName: "Miles",
+      lastName: "Cummerata",
+      email: "test@test.com",
+      image: "test.jpg",
+    };
+
     expect(lastNameColumn?.onFilter?.("cummerata", testUser)).toBe(true);
     expect(lastNameColumn?.onFilter?.("smith", testUser)).toBe(false);
   });

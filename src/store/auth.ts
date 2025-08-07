@@ -28,7 +28,7 @@ const { update } = authSlice.actions;
 
 export const updateAuth =
   (authData: AuthData): AppThunk =>
-  (dispatch) => {
+  dispatch => {
     dispatch(update(authData));
   };
 

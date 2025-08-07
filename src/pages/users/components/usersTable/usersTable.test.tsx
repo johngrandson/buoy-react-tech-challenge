@@ -5,7 +5,11 @@ import { User } from "services/users/interface";
 jest.mock("antd", () => ({
   Table: ({ dataSource, loading, pagination }: any) => (
     <div>
-      {loading && <div role="alert" className="ant-spin">Loading...</div>}
+      {loading && (
+        <div role="alert" className="ant-spin">
+          Loading...
+        </div>
+      )}
       {!loading && dataSource.length === 0 && <div>No data</div>}
       {dataSource.map((item: any) => (
         <div key={item.id}>
@@ -18,9 +22,7 @@ jest.mock("antd", () => ({
       )}
     </div>
   ),
-  Button: ({ children, onClick }: any) => (
-    <button onClick={onClick}>{children}</button>
-  ),
+  Button: ({ children, onClick }: any) => <button onClick={onClick}>{children}</button>,
   Space: ({ children }: any) => <div>{children}</div>,
 }));
 

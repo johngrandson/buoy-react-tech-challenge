@@ -11,15 +11,9 @@ export interface BrandProfileData {
 }
 
 export abstract class BrandProfileService extends AuthedService {
-  abstract getAll(
-    query?: string
-  ): Promise<PaginatedResult<BrandProfileData> | undefined>;
-  abstract getByUser(
-    query?: string
-  ): Promise<PaginatedResult<BrandProfileData> | undefined>;
-  abstract getById(
-    brandId: ElementIdType
-  ): Promise<BrandProfileData | undefined>;
+  abstract getAll(query?: string): Promise<PaginatedResult<BrandProfileData> | undefined>;
+  abstract getByUser(query?: string): Promise<PaginatedResult<BrandProfileData> | undefined>;
+  abstract getById(brandId: ElementIdType): Promise<BrandProfileData | undefined>;
   abstract update(
     brandId: ElementIdType,
     body: Partial<BrandProfileData>

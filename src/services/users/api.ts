@@ -67,10 +67,7 @@ class UsersApiService {
     return this.fetchGet<User>(`/users/${id}`);
   }
 
-  public async search(
-    query: string,
-    params?: Omit<UsersParams, "q">
-  ): Promise<UsersResponse> {
+  public async search(query: string, params?: Omit<UsersParams, "q">): Promise<UsersResponse> {
     const searchParams = new URLSearchParams({ q: query });
 
     if (params?.limit) {
@@ -83,9 +80,7 @@ class UsersApiService {
       searchParams.append("select", params.select);
     }
 
-    return this.fetchGet<UsersResponse>(
-      `/users/search?${searchParams.toString()}`
-    );
+    return this.fetchGet<UsersResponse>(`/users/search?${searchParams.toString()}`);
   }
 }
 

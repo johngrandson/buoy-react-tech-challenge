@@ -41,11 +41,10 @@ const { update } = environmentConfigSlice.actions;
 
 export const updateEnvironmentConfig =
   (environmentConfigData: EnvironmentConfigData): AppThunk =>
-  (dispatch) => {
+  dispatch => {
     dispatch(update(environmentConfigData));
   };
 
-export const getEnvironmentConfig = (state: RootState) =>
-  state.environmentConfig;
+export const getEnvironmentConfig = (state: RootState) => state.environmentConfig;
 
 export default environmentConfigSlice.reducer;

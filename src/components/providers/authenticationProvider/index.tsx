@@ -10,9 +10,7 @@ interface AuthenticationProviderProps {
   children: JSX.Element | JSX.Element[];
 }
 
-export function AuthenticationProvider({
-  children,
-}: AuthenticationProviderProps) {
+export function AuthenticationProvider({ children }: AuthenticationProviderProps) {
   const auth = useAppSelector(getAuth);
   const dispatch = useAppDispatch();
 

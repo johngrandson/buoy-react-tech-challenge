@@ -10,10 +10,7 @@ interface IntlProviderProps {
 export function IntlAppProvider({ children }: IntlProviderProps) {
   const intlConfig = useAppSelector(getIntlConfig);
   return (
-    <IntlProvider
-      messages={AppLocaleMessage[intlConfig.locale]}
-      locale={intlConfig.locale}
-    >
+    <IntlProvider messages={AppLocaleMessage[intlConfig.locale]} locale={intlConfig.locale}>
       {children}
     </IntlProvider>
   );

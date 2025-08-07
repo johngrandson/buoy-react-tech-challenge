@@ -9,31 +9,19 @@ export class ApiService {
     return `${host}${path}`;
   };
 
-  protected async fetchGet(
-    uri: string,
-    options: RequestInit,
-    isBlob?: boolean
-  ): Promise<any> {
+  protected async fetchGet(uri: string, options: RequestInit, isBlob?: boolean): Promise<any> {
     const endpoint = this.buildEndpoint(uri);
-    return fetch(endpoint, options).then((response) =>
-      this.handleResponse(response, isBlob)
-    );
+    return fetch(endpoint, options).then(response => this.handleResponse(response, isBlob));
   }
 
-  protected async fetchPost(
-    endpoint: string,
-    options: RequestInit,
-    body: any
-  ): Promise<any> {
+  protected async fetchPost(endpoint: string, options: RequestInit, body: any): Promise<any> {
     const requestHeaders: Record<string, string> = {
       "Content-Type": "application/json",
       ...(options.headers as Record<string, string>),
     };
 
     const requestBody =
-      requestHeaders["Content-Type"] === "application/json"
-        ? JSON.stringify(body)
-        : body;
+      requestHeaders["Content-Type"] === "application/json" ? JSON.stringify(body) : body;
 
     if (requestHeaders["Content-Type"] === "multipart/form-data")
       delete requestHeaders["Content-Type"];
@@ -61,9 +49,7 @@ export class ApiService {
     };
 
     const requestBody =
-      requestHeaders["Content-Type"] === "application/json"
-        ? JSON.stringify(body)
-        : body;
+      requestHeaders["Content-Type"] === "application/json" ? JSON.stringify(body) : body;
 
     const requestOptions: RequestInit = {
       ...options,
@@ -74,10 +60,7 @@ export class ApiService {
     return fetch(endpoint, requestOptions).then(this.handleResponse);
   }
 
-  private async handleResponse(
-    response: Response,
-    isBlob?: boolean
-  ): Promise<any> {
+  private async handleResponse(response: Response, isBlob?: boolean): Promise<any> {
     if (isBlob) return response.blob();
 
     if (!response.ok) {

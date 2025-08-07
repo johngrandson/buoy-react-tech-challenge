@@ -53,8 +53,8 @@ function EChart() {
           than last week <span className="bnb2">+30%</span>
         </Paragraph>
         <Paragraph className="lastweek">
-          We have created multiple options for you to put together and customise
-          into pixel perfect pages.
+          We have created multiple options for you to put together and customise into pixel perfect
+          pages.
         </Paragraph>
         <Row gutter>
           {items.map((v, index) => (

@@ -6,13 +6,13 @@ import ContentLayout from "components/layout/content/contentLayout";
 
 export function Users() {
   const [pageSize, setPageSize] = useState(100);
-  
+
   // Fetch all users in one page for client-side operations
-  const { data, isLoading, isError, error } = useGetUsersPaginated({ 
-    page: 1, 
-    pageSize 
+  const { data, isLoading, isError, error } = useGetUsersPaginated({
+    page: 1,
+    pageSize,
   });
-  
+
   // Dynamically adjust page size based on total
   useEffect(() => {
     if (data?.total && data.total > pageSize) {
@@ -35,10 +35,7 @@ export function Users() {
 
   return (
     <ContentLayout>
-      <UsersTable 
-        users={data?.users || []} 
-        loading={isLoading}
-      />
+      <UsersTable users={data?.users || []} loading={isLoading} />
     </ContentLayout>
   );
 }

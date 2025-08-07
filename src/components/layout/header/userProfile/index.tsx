@@ -32,11 +32,7 @@ export const UserProfile = () => {
         {userData && <Avatar src={userData.avatar} icon={<UserOutlined />} />}
       </Button>
       {userData && (
-        <UserProfileModal
-          userData={userData}
-          open={modalIsOpen}
-          closeModal={closeModal}
-        />
+        <UserProfileModal userData={userData} open={modalIsOpen} closeModal={closeModal} />
       )}
     </>
   );

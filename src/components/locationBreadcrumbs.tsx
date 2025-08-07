@@ -15,12 +15,10 @@ const basebreadcrumbNameMap: Record<string, string> = {
   [AppPath.home]: "navigation.dashboard",
   [AppPath.brandProfile]: "navigation.brandProfile",
   [AppPath.userProfile]: "navigation.userProfile",
-  [AppPath.users]: "navigation.users"
+  [AppPath.users]: "navigation.users",
 };
 
-export function LocationBreadcrumbs({
-  breadcrumbEnd,
-}: LocationBreadcrumbsProps) {
+export function LocationBreadcrumbs({ breadcrumbEnd }: LocationBreadcrumbsProps) {
   const { formatMessage } = useIntl();
 
   const { sidebarItems } = useContext(AppLayoutContext);
@@ -28,9 +26,7 @@ export function LocationBreadcrumbs({
   const linkBuilder = useAppLinkBuilder();
 
   const location = useLocation();
-  const pathSnippets = location.pathname
-    .split("/")
-    .filter((i) => i && i !== "" && i !== " ");
+  const pathSnippets = location.pathname.split("/").filter(i => i && i !== "" && i !== " ");
 
   const sidebarBreadcrumbNameMap = sidebarItems.reduce<Record<string, string>>(
     (prev, curr) => ({ ...prev, [curr.key || ""]: curr.title || "" }),
@@ -42,24 +38,22 @@ export function LocationBreadcrumbs({
     ...sidebarBreadcrumbNameMap,
   };
 
-  const pathBreadcrumbItems: BreadcrumbItemType[] = pathSnippets.map(
-    (_, index) => {
-      const url = `/${pathSnippets.slice(0, index + 1).join("/")}`;
-      return {
-        key: url,
-        title: (
-          <Link to={linkBuilder(url)}>
-            {allBreadcrumbNameMap[url]
-              ? formatMessage({
-                  id: allBreadcrumbNameMap[url],
-                })
-              : breadcrumbEnd}
-          </Link>
-        ),
-        separator: index < pathSnippets.length ? "/" : "",
-      };
-    }
-  );
+  const pathBreadcrumbItems: BreadcrumbItemType[] = pathSnippets.map((_, index) => {
+    const url = `/${pathSnippets.slice(0, index + 1).join("/")}`;
+    return {
+      key: url,
+      title: (
+        <Link to={linkBuilder(url)}>
+          {allBreadcrumbNameMap[url]
+            ? formatMessage({
+                id: allBreadcrumbNameMap[url],
+              })
+            : breadcrumbEnd}
+        </Link>
+      ),
+      separator: index < pathSnippets.length ? "/" : "",
+    };
+  });
 
   return <Breadcrumb items={pathBreadcrumbItems} />;
 }

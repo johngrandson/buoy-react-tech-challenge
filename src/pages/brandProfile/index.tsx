@@ -1,16 +1,6 @@
 import { useIntl } from "react-intl";
 import { InboxOutlined } from "@ant-design/icons";
-import {
-  Card,
-  Col,
-  Row,
-  Anchor,
-  Form,
-  Input,
-  Typography,
-  Button,
-  Spin,
-} from "antd";
+import { Card, Col, Row, Anchor, Form, Input, Typography, Button, Spin } from "antd";
 import UploadField from "components/uploadField";
 import { useBrandCRUD } from "hooks/react-query/brand";
 import { useGetBrandId } from "hooks";
@@ -36,11 +26,7 @@ export function BrandProfile() {
     <ContentLayout>
       {isLoading && <Spin />}
       {!isLoading && isSuccess && data && (
-        <Form
-          disabled={updateIsLoading}
-          initialValues={data}
-          onFinish={handleOnFinish}
-        >
+        <Form disabled={updateIsLoading} initialValues={data} onFinish={handleOnFinish}>
           <Row justify="space-around" gutter={[0, 20]}>
             <Col span={24}>
               <Row justify="space-around" gutter={[0, 20]}>
@@ -117,11 +103,7 @@ export function BrandProfile() {
                           name={"avatar"}
                           noStyle
                         >
-                          <UploadField
-                            initialValue={data.avatar}
-                            width={"240px"}
-                            height={"132px"}
-                          >
+                          <UploadField initialValue={data.avatar} width={"240px"} height={"132px"}>
                             <>
                               <p className="ant-upload-drag-icon">
                                 <InboxOutlined />

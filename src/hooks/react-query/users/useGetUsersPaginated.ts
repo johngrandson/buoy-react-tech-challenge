@@ -8,9 +8,9 @@ interface UseGetUsersPaginatedParams {
   pageSize?: number;
 }
 
-export function useGetUsersPaginated({ 
-  page, 
-  pageSize = 13 
+export function useGetUsersPaginated({
+  page,
+  pageSize = 13,
 }: UseGetUsersPaginatedParams): UseQueryResult<UsersResponse> & {
   hasNextPage: boolean;
   hasPreviousPage: boolean;

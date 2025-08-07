@@ -17,10 +17,13 @@ type DataIndex = keyof User;
  * 4. Consistent sizing with predefined size options
  * 5. Lighter weight component for simple user images
  */
-const MemoizedAvatar = memo<{ image: string; record: User }>(function MemoizedAvatar({ image, record }) {
+const MemoizedAvatar = memo<{ image: string; record: User }>(function MemoizedAvatar({
+  image,
+  record,
+}) {
   return (
-    <Avatar 
-      src={image || userCircleIcon} 
+    <Avatar
+      src={image || userCircleIcon}
       alt={`${record.firstName} ${record.lastName}`}
       size="large"
     >
@@ -32,16 +35,14 @@ const MemoizedAvatar = memo<{ image: string; record: User }>(function MemoizedAv
 export const useUsersTableColumns = () => {
   const searchInput = useRef<InputRef>(null);
 
-  const handleSearch = (
-    confirm: FilterDropdownProps['confirm'],
-  ) => {
+  const handleSearch = (confirm: FilterDropdownProps["confirm"]) => {
     confirm();
   };
 
   const handleReset = (
-    clearFilters: () => void, 
+    clearFilters: () => void,
     setSelectedKeys: (keys: string[]) => void,
-    confirm: FilterDropdownProps['confirm']
+    confirm: FilterDropdownProps["confirm"]
   ) => {
     setSelectedKeys([]);
     clearFilters();
@@ -50,14 +51,14 @@ export const useUsersTableColumns = () => {
 
   const getColumnSearchProps = (dataIndex: DataIndex): ColumnType<User> => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
-      <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+      <div style={{ padding: 8 }} onKeyDown={e => e.stopPropagation()}>
         <Input
           ref={searchInput}
           placeholder={`Search ${dataIndex}`}
           value={selectedKeys[0]}
-          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
           onPressEnter={() => handleSearch(confirm)}
-          style={{ marginBottom: 8, display: 'block' }}
+          style={{ marginBottom: 8, display: "block" }}
           autoFocus
         />
         <Space>
@@ -81,7 +82,7 @@ export const useUsersTableColumns = () => {
       </div>
     ),
     filterIcon: (filtered: boolean) => (
-      <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
+      <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
     ),
     onFilter: (value, record) =>
       record[dataIndex]
@@ -90,7 +91,7 @@ export const useUsersTableColumns = () => {
         .includes((value as string).toLowerCase()) ?? false,
   });
 
-const USERS_TABLE_COLUMNS: ColumnsType<User> = [
+  const USERS_TABLE_COLUMNS: ColumnsType<User> = [
     {
       title: "ID",
       dataIndex: "id",
@@ -102,14 +103,14 @@ const USERS_TABLE_COLUMNS: ColumnsType<User> = [
       dataIndex: "firstName",
       key: "firstName",
       width: 120,
-      ...getColumnSearchProps('firstName'),
+      ...getColumnSearchProps("firstName"),
     },
     {
       title: "Last Name",
       dataIndex: "lastName",
-      key: "lastName", 
+      key: "lastName",
       width: 120,
-      ...getColumnSearchProps('lastName'),
+      ...getColumnSearchProps("lastName"),
     },
     {
       title: "Name",
@@ -130,9 +131,7 @@ const USERS_TABLE_COLUMNS: ColumnsType<User> = [
       dataIndex: "image",
       key: "image",
       width: 80,
-      render: (image: string, record: User) => (
-        <MemoizedAvatar image={image} record={record} />
-      ),
+      render: (image: string, record: User) => <MemoizedAvatar image={image} record={record} />,
     },
   ];
 

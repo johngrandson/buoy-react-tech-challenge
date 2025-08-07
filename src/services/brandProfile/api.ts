@@ -21,7 +21,7 @@ export class BrandProfileApiService extends BrandProfileService {
 
     // Create and store the request promise
     this.getAllPromise = this.doGetAll(query);
-    
+
     try {
       // Wait for the request to complete
       const result = await this.getAllPromise;
@@ -46,7 +46,7 @@ export class BrandProfileApiService extends BrandProfileService {
 
     // Create and store the request promise
     this.getByUserPromise = this.doGetByUser(query);
-    
+
     try {
       // Wait for the request to complete
       const result = await this.getByUserPromise;
@@ -65,7 +65,7 @@ export class BrandProfileApiService extends BrandProfileService {
    */
   async getById(brandId: number | string): Promise<BrandProfileData> {
     const key = String(brandId);
-    
+
     // If a request for this brand is already in progress, return the same promise
     if (this.getByIdPromises.has(key)) {
       return this.getByIdPromises.get(key)!;
@@ -74,7 +74,7 @@ export class BrandProfileApiService extends BrandProfileService {
     // Create and store the request promise
     const promise = this.doGetById(brandId);
     this.getByIdPromises.set(key, promise);
-    
+
     try {
       // Wait for the request to complete
       const result = await promise;

@@ -10,10 +10,7 @@ export interface CrudExampleData {
 export abstract class CrudExampleService extends AuthedService {
   abstract getAll(query?: string): Promise<PaginatedResult<CrudExampleData>>;
   abstract getByUser(query?: string): Promise<PaginatedResult<CrudExampleData>>;
-  abstract getById(
-    brandId: ElementIdType,
-    crudExampleId: ElementIdType
-  ): Promise<CrudExampleData>;
+  abstract getById(brandId: ElementIdType, crudExampleId: ElementIdType): Promise<CrudExampleData>;
   abstract update(
     crudExampleId: ElementIdType,
     body: Partial<CrudExampleData>

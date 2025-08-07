@@ -6,11 +6,7 @@ interface ProgressAvatarProps {
   percent?: number;
 }
 
-export function ProgressAvatar({
-  src,
-  label = "",
-  percent = 50,
-}: ProgressAvatarProps) {
+export function ProgressAvatar({ src, label = "", percent = 50 }: ProgressAvatarProps) {
   const {
     token: { controlHeight },
   } = theme.useToken();
@@ -29,6 +25,7 @@ export function ProgressAvatar({
           padding: 1,
           height: controlHeight * 2,
         }}
+        alt="Progress avatar"
       />
       {typeof percent === "number" ? (
         <div

@@ -42,11 +42,7 @@ export function AppSidebar({ collapsed, setCollapsed }: AppSidebarProps) {
     },
   ];
 
-  const allMenuItems = [
-    ...topDefaultItems,
-    ...sidebarItems,
-    ...bottomDefaultItems,
-  ];
+  const allMenuItems = [...topDefaultItems, ...sidebarItems, ...bottomDefaultItems];
 
   return (
     <Sider
@@ -61,19 +57,18 @@ export function AppSidebar({ collapsed, setCollapsed }: AppSidebarProps) {
       }}
       collapsible
       collapsed={collapsed}
-      onCollapse={(value) => setCollapsed(value)}
+      onCollapse={value => setCollapsed(value)}
     >
       <Row
         align="middle"
         style={{ width: "100%", marginLeft: margin, height: controlHeight * 2 }}
-      >
-      </Row>
+      ></Row>
       <Row justify="space-between">
         <Col span={24}>
           <Menu
             mode="inline"
             items={allMenuItems}
-            onClick={(event) => navigate(event.key)}
+            onClick={event => navigate(event.key)}
             //warning: [antd: Menu] `inlineCollapsed` not control Menu under Sider. Should set `collapsed` on Sider instead.
           />
         </Col>

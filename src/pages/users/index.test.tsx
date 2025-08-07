@@ -21,7 +21,9 @@ jest.mock("components/layout/content/contentLayout", () => ({
   default: ({ children }: any) => <div>{children}</div>,
 }));
 
-const mockUseGetUsersPaginated = useGetUsersPaginated as jest.MockedFunction<typeof useGetUsersPaginated>;
+const mockUseGetUsersPaginated = useGetUsersPaginated as jest.MockedFunction<
+  typeof useGetUsersPaginated
+>;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -31,11 +33,9 @@ const createWrapper = () => {
       },
     },
   });
-  
+
   return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 };
 
@@ -48,8 +48,20 @@ describe("Users", () => {
     mockUseGetUsersPaginated.mockReturnValue({
       data: {
         users: [
-          { id: 1, firstName: "John", lastName: "Doe", email: "john@example.com", image: "john.jpg" },
-          { id: 2, firstName: "Jane", lastName: "Smith", email: "jane@example.com", image: "jane.jpg" },
+          {
+            id: 1,
+            firstName: "John",
+            lastName: "Doe",
+            email: "john@example.com",
+            image: "john.jpg",
+          },
+          {
+            id: 2,
+            firstName: "Jane",
+            lastName: "Smith",
+            email: "jane@example.com",
+            image: "jane.jpg",
+          },
         ],
         total: 2,
         skip: 0,
@@ -104,20 +116,23 @@ describe("Users", () => {
   });
 
   it("should dynamically adjust page size when total exceeds initial limit", async () => {
-    mockUseGetUsersPaginated.mockImplementation(({ pageSize: ps = 100 }) => ({
-      data: {
-        users: [],
-        total: 200,
-        skip: 0,
-        limit: ps,
-      },
-      isLoading: false,
-      isError: false,
-      error: null,
-      hasNextPage: false,
-      hasPreviousPage: false,
-      totalPages: 1,
-    } as any));
+    mockUseGetUsersPaginated.mockImplementation(
+      ({ pageSize: ps = 100 }) =>
+        ({
+          data: {
+            users: [],
+            total: 200,
+            skip: 0,
+            limit: ps,
+          },
+          isLoading: false,
+          isError: false,
+          error: null,
+          hasNextPage: false,
+          hasPreviousPage: false,
+          totalPages: 1,
+        }) as any
+    );
 
     render(<Users />, { wrapper: createWrapper() });
 

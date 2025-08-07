@@ -1,4 +1,3 @@
-import { AuthedService } from "../base/authedService";
 import { UserProfileData, UserProfileService } from "./interface";
 
 export class UserProfileApiService extends UserProfileService {
@@ -18,7 +17,7 @@ export class UserProfileApiService extends UserProfileService {
 
     // Create and store the request promise
     this.getMyUserPromise = this.doGetMyUser();
-    
+
     try {
       // Wait for the request to complete
       const result = await this.getMyUserPromise;

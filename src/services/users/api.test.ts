@@ -109,8 +109,6 @@ describe("UsersApiService", () => {
       status: 404,
     } as Response);
 
-    await expect(usersApiService.getAll()).rejects.toThrow(
-      "HTTP error! status: 404"
-    );
+    await expect(usersApiService.getAll()).rejects.toThrow("HTTP error! status: 404");
   });
 });

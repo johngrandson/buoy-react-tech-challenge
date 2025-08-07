@@ -7,10 +7,9 @@ import { BrandProfileData } from "services/brandProfile/interface";
 import { DownOutlined } from "@ant-design/icons";
 import { useGetMyBrands } from "hooks/react-query/user/useGetMyBrands";
 
-export const searchFilter =
-  (searchValue: string) => (brand: BrandProfileData) =>
-    normalizeString(brand.name || "").includes(normalizeString(searchValue)) ||
-    brand.id.toString().includes(searchValue);
+export const searchFilter = (searchValue: string) => (brand: BrandProfileData) =>
+  normalizeString(brand.name || "").includes(normalizeString(searchValue)) ||
+  brand.id.toString().includes(searchValue);
 
 const normalizeString = (text: string) => text.toLocaleLowerCase().trim();
 
@@ -36,20 +35,16 @@ export const BrandSelect = () => {
     closeModal();
   };
 
-  const brandList =
-    myBrands &&
-    myBrands.list &&
-    myBrands.list.filter(searchFilter(searchValue));
+  const brandList = myBrands && myBrands.list && myBrands.list.filter(searchFilter(searchValue));
 
   useEffect(() => {
-    const matchingBrand =
-      brandId && brandList && brandList.find(({ id }) => id === +brandId);
+    const matchingBrand = brandId && brandList && brandList.find(({ id }) => id === +brandId);
     if (matchingBrand && matchingBrand?.id !== selectedBrand?.id) {
       setSelectedBrand(matchingBrand);
     } else if (!matchingBrand) {
       updateBrandId(myBrands?.list[0]?.id?.toString() || "0");
     }
-  }, [myBrands, brandList, brandId]);
+  }, [myBrands, brandList, brandId, selectedBrand?.id, updateBrandId]);
 
   const fetchBrands = () => {};
   const onSearch = (val: string) => {
@@ -68,10 +63,7 @@ export const BrandSelect = () => {
         <Card bordered={false} size="small" style={{ padding: 0 }}>
           <Row align="middle" gutter={10}>
             <Col>
-              <Avatar
-                shape="circle"
-                src={selectedBrand?.logo || selectedBrand?.avatar}
-              />
+              <Avatar shape="circle" src={selectedBrand?.logo || selectedBrand?.avatar} />
             </Col>
             <Col>
               <Typography.Text>{selectedBrand?.name}</Typography.Text>
@@ -90,10 +82,7 @@ export const BrandSelect = () => {
         >
           <Row align="middle" gutter={10}>
             <Col>
-              <Avatar
-                shape="circle"
-                src={selectedBrand?.logo || selectedBrand?.avatar}
-              />
+              <Avatar shape="circle" src={selectedBrand?.logo || selectedBrand?.avatar} />
             </Col>
             <Col>
               <Typography.Text>{selectedBrand?.name}</Typography.Text>

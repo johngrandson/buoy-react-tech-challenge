@@ -18,9 +18,7 @@ describe("LoginApiService", () => {
 
     // Cast to our test type to access protected methods safely
     const serviceWithProtected = service as LoginApiServiceWithProtected;
-    jest
-      .spyOn(serviceWithProtected, "fetchPost")
-      .mockImplementation(mockFetchPost);
+    jest.spyOn(serviceWithProtected, "fetchPost").mockImplementation(mockFetchPost);
 
     localStorage.clear();
     jest.clearAllMocks();
@@ -46,259 +44,257 @@ describe("LoginApiService", () => {
 
       const result = await service.login(loginRequest);
 
-      expect(mockFetchPost).toHaveBeenCalledWith(
-        "/login/",
-        { method: "POST" },
-        loginRequest
-      );
+      expect(mockFetchPost).toHaveBeenCalledWith("/login/", { method: "POST" }, loginRequest);
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should not make duplicate requests when login is called multiple times simultaneously', async () => {
+    it("should not make duplicate requests when login is called multiple times simultaneously", async () => {
       const loginRequest: LoginRequestData = {
-        email: 'user@example.com',
-        password: 'password123'
+        email: "user@example.com",
+        password: "password123",
       };
-      
+
       const expectedResponse: LoginResponseData = {
-        access: 'access-token-123',
-        refresh: 'refresh-token-123'
+        access: "access-token-123",
+        refresh: "refresh-token-123",
       };
-      
+
       // Mock a slow response to ensure concurrent calls
-      mockFetchPost.mockImplementation(() => 
-        new Promise(resolve => 
-          setTimeout(() => resolve(expectedResponse), 100)
-        )
+      mockFetchPost.mockImplementation(
+        () => new Promise(resolve => setTimeout(() => resolve(expectedResponse), 100))
       );
-      
+
       // Mock localStorage methods
-      jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
-      
+      jest.spyOn(Storage.prototype, "setItem").mockImplementation(() => {});
+
       // Call login multiple times simultaneously
       const promises = [
         service.login(loginRequest),
         service.login(loginRequest),
-        service.login(loginRequest)
+        service.login(loginRequest),
       ];
-      
+
       const results = await Promise.all(promises);
-      
+
       // All calls should return the same response
       expect(results[0]).toEqual(expectedResponse);
       expect(results[1]).toEqual(expectedResponse);
       expect(results[2]).toEqual(expectedResponse);
-      
+
       // But fetchPost should only be called once
       expect(mockFetchPost).toHaveBeenCalledTimes(1);
-      expect(mockFetchPost).toHaveBeenCalledWith(
-        '/login/',
-        { method: 'POST' },
-        loginRequest
-      );
-      
+      expect(mockFetchPost).toHaveBeenCalledWith("/login/", { method: "POST" }, loginRequest);
+
       // localStorage should only be called once
       expect(Storage.prototype.setItem).toHaveBeenCalledTimes(1);
       expect(Storage.prototype.setItem).toHaveBeenCalledWith(
-        'loginData',
+        "loginData",
         JSON.stringify(expectedResponse)
       );
     });
 
-    it('should handle concurrent login errors correctly and clear promise cache', async () => {
+    it("should handle concurrent login errors correctly and clear promise cache", async () => {
       const loginRequest: LoginRequestData = {
-        email: 'invalid@example.com',
-        password: 'wrongpassword'
+        email: "invalid@example.com",
+        password: "wrongpassword",
       };
-      
-      const loginError = new Error('Invalid credentials');
-      
+
+      const loginError = new Error("Invalid credentials");
+
       // Mock a slow failing response
-      mockFetchPost.mockImplementation(() => 
-        new Promise((_, reject) => 
-          setTimeout(() => reject(loginError), 100)
-        )
+      mockFetchPost.mockImplementation(
+        () => new Promise((_, reject) => setTimeout(() => reject(loginError), 100))
       );
-      
+
       // Call login multiple times simultaneously
       const promises = [
         service.login(loginRequest),
         service.login(loginRequest),
-        service.login(loginRequest)
+        service.login(loginRequest),
       ];
-      
+
       // All promises should reject with the same error
-      await Promise.all(promises.map(promise => 
-        expect(promise).rejects.toThrow('Invalid credentials')
-      ));
-      
+      await Promise.all(
+        promises.map(promise => expect(promise).rejects.toThrow("Invalid credentials"))
+      );
+
       // But fetchPost should only be called once
       expect(mockFetchPost).toHaveBeenCalledTimes(1);
-      expect(mockFetchPost).toHaveBeenCalledWith(
-        '/login/',
-        { method: 'POST' },
-        loginRequest
-      );
-      
+      expect(mockFetchPost).toHaveBeenCalledWith("/login/", { method: "POST" }, loginRequest);
+
       // After error, cache should be cleared and new attempt should work
       const successResponse: LoginResponseData = {
-        access: 'new-access-token',
-        refresh: 'new-refresh-token'
+        access: "new-access-token",
+        refresh: "new-refresh-token",
       };
-      
+
       mockFetchPost.mockResolvedValueOnce(successResponse);
-      jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
-      
+      jest.spyOn(Storage.prototype, "setItem").mockImplementation(() => {});
+
       const retryResult = await service.login({
-        email: 'valid@example.com',
-        password: 'correctpassword'
+        email: "valid@example.com",
+        password: "correctpassword",
       });
-      
+
       expect(retryResult).toEqual(successResponse);
       expect(mockFetchPost).toHaveBeenCalledTimes(2); // First failed, second succeeded
     });
 
-    it('should allow new login after logout without cache interference', async () => {
+    it("should allow new login after logout without cache interference", async () => {
       // First login
       const firstLoginRequest: LoginRequestData = {
-        email: 'user1@example.com',
-        password: 'password1'
+        email: "user1@example.com",
+        password: "password1",
       };
-      
+
       const firstLoginResponse: LoginResponseData = {
-        access: 'first-access-token',
-        refresh: 'first-refresh-token'
+        access: "first-access-token",
+        refresh: "first-refresh-token",
       };
-      
+
       mockFetchPost.mockResolvedValueOnce(firstLoginResponse);
-      jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
-      jest.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {});
-      
+      jest.spyOn(Storage.prototype, "setItem").mockImplementation(() => {});
+      jest.spyOn(Storage.prototype, "removeItem").mockImplementation(() => {});
+
       const firstResult = await service.login(firstLoginRequest);
       expect(firstResult).toEqual(firstLoginResponse);
       expect(mockFetchPost).toHaveBeenCalledTimes(1);
-      
+
       // Logout
       service.logout();
-      expect(Storage.prototype.removeItem).toHaveBeenCalledWith('loginData');
-      
+      expect(Storage.prototype.removeItem).toHaveBeenCalledWith("loginData");
+
       // Second login with different credentials
       const secondLoginRequest: LoginRequestData = {
-        email: 'user2@example.com',
-        password: 'password2'
+        email: "user2@example.com",
+        password: "password2",
       };
-      
+
       const secondLoginResponse: LoginResponseData = {
-        access: 'second-access-token',
-        refresh: 'second-refresh-token'
+        access: "second-access-token",
+        refresh: "second-refresh-token",
       };
-      
+
       mockFetchPost.mockResolvedValueOnce(secondLoginResponse);
-      
+
       const secondResult = await service.login(secondLoginRequest);
       expect(secondResult).toEqual(secondLoginResponse);
-      
+
       // Should have made 2 separate API calls (no cache interference)
       expect(mockFetchPost).toHaveBeenCalledTimes(2);
-      expect(mockFetchPost).toHaveBeenNthCalledWith(1, '/login/', { method: 'POST' }, firstLoginRequest);
-      expect(mockFetchPost).toHaveBeenNthCalledWith(2, '/login/', { method: 'POST' }, secondLoginRequest);
+      expect(mockFetchPost).toHaveBeenNthCalledWith(
+        1,
+        "/login/",
+        { method: "POST" },
+        firstLoginRequest
+      );
+      expect(mockFetchPost).toHaveBeenNthCalledWith(
+        2,
+        "/login/",
+        { method: "POST" },
+        secondLoginRequest
+      );
     });
 
-    it('should handle rapid sequential login attempts correctly', async () => {
+    it("should handle rapid sequential login attempts correctly", async () => {
       const loginRequest: LoginRequestData = {
-        email: 'rapid@example.com',
-        password: 'password123'
+        email: "rapid@example.com",
+        password: "password123",
       };
-      
+
       const loginResponse: LoginResponseData = {
-        access: 'rapid-access-token',
-        refresh: 'rapid-refresh-token'
+        access: "rapid-access-token",
+        refresh: "rapid-refresh-token",
       };
-      
+
       // Mock slower responses (50ms each) to ensure overlap
-      mockFetchPost.mockImplementation(() => 
-        new Promise(resolve => 
-          setTimeout(() => resolve(loginResponse), 50)
-        )
+      mockFetchPost.mockImplementation(
+        () => new Promise(resolve => setTimeout(() => resolve(loginResponse), 50))
       );
-      
-      jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
-      
+
+      jest.spyOn(Storage.prototype, "setItem").mockImplementation(() => {});
+
       // Make rapid sequential calls with minimal delay
       const firstCall = service.login(loginRequest);
       await new Promise(resolve => setTimeout(resolve, 10)); // Wait 10ms (still within 50ms API call)
       const secondCall = service.login(loginRequest);
       await new Promise(resolve => setTimeout(resolve, 10)); // Wait 10ms (still within API call)
       const thirdCall = service.login(loginRequest);
-      
+
       const results = await Promise.all([firstCall, secondCall, thirdCall]);
-      
+
       // All should return the same response
       expect(results[0]).toEqual(loginResponse);
       expect(results[1]).toEqual(loginResponse);
       expect(results[2]).toEqual(loginResponse);
-      
+
       // Only the first request should have triggered an API call
       // The second and third should have reused the cached promise
       expect(mockFetchPost).toHaveBeenCalledTimes(1);
-      expect(mockFetchPost).toHaveBeenCalledWith('/login/', { method: 'POST' }, loginRequest);
-      
+      expect(mockFetchPost).toHaveBeenCalledWith("/login/", { method: "POST" }, loginRequest);
+
       // localStorage should only be called once
       expect(Storage.prototype.setItem).toHaveBeenCalledTimes(1);
     });
 
-    it('should not cache login requests with different credentials', async () => {
+    it("should not cache login requests with different credentials", async () => {
       const firstLoginRequest: LoginRequestData = {
-        email: 'user1@example.com',
-        password: 'password1'
+        email: "user1@example.com",
+        password: "password1",
       };
-      
+
       const secondLoginRequest: LoginRequestData = {
-        email: 'user2@example.com',
-        password: 'password2'
+        email: "user2@example.com",
+        password: "password2",
       };
-      
+
       const firstLoginResponse: LoginResponseData = {
-        access: 'user1-access-token',
-        refresh: 'user1-refresh-token'
+        access: "user1-access-token",
+        refresh: "user1-refresh-token",
       };
-      
+
       const secondLoginResponse: LoginResponseData = {
-        access: 'user2-access-token',
-        refresh: 'user2-refresh-token'
+        access: "user2-access-token",
+        refresh: "user2-refresh-token",
       };
-      
+
       // Mock slow responses to test concurrent behavior
       mockFetchPost
-        .mockImplementationOnce(() => 
-          new Promise(resolve => 
-            setTimeout(() => resolve(firstLoginResponse), 50)
-          )
+        .mockImplementationOnce(
+          () => new Promise(resolve => setTimeout(() => resolve(firstLoginResponse), 50))
         )
-        .mockImplementationOnce(() => 
-          new Promise(resolve => 
-            setTimeout(() => resolve(secondLoginResponse), 50)
-          )
+        .mockImplementationOnce(
+          () => new Promise(resolve => setTimeout(() => resolve(secondLoginResponse), 50))
         );
-      
-      jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
-      
+
+      jest.spyOn(Storage.prototype, "setItem").mockImplementation(() => {});
+
       // Make concurrent calls with different credentials
       const firstCall = service.login(firstLoginRequest);
       await new Promise(resolve => setTimeout(resolve, 10)); // Small delay
       const secondCall = service.login(secondLoginRequest);
-      
+
       const results = await Promise.all([firstCall, secondCall]);
-      
+
       // Should return different responses for different credentials
       expect(results[0]).toEqual(firstLoginResponse);
       expect(results[1]).toEqual(secondLoginResponse);
-      
+
       // Should make separate API calls for different credentials (no caching)
       expect(mockFetchPost).toHaveBeenCalledTimes(2);
-      expect(mockFetchPost).toHaveBeenNthCalledWith(1, '/login/', { method: 'POST' }, firstLoginRequest);
-      expect(mockFetchPost).toHaveBeenNthCalledWith(2, '/login/', { method: 'POST' }, secondLoginRequest);
-      
+      expect(mockFetchPost).toHaveBeenNthCalledWith(
+        1,
+        "/login/",
+        { method: "POST" },
+        firstLoginRequest
+      );
+      expect(mockFetchPost).toHaveBeenNthCalledWith(
+        2,
+        "/login/",
+        { method: "POST" },
+        secondLoginRequest
+      );
+
       // localStorage should be called twice (once for each user)
       expect(Storage.prototype.setItem).toHaveBeenCalledTimes(2);
     });
@@ -320,9 +316,7 @@ describe("LoginApiService", () => {
       };
 
       // Mock localStorage to return expired token
-      jest
-        .spyOn(Storage.prototype, "getItem")
-        .mockReturnValue(JSON.stringify(expiredToken));
+      jest.spyOn(Storage.prototype, "getItem").mockReturnValue(JSON.stringify(expiredToken));
       jest.spyOn(Storage.prototype, "setItem").mockImplementation(() => {});
 
       // Mock current time to be after token expiration
@@ -332,11 +326,7 @@ describe("LoginApiService", () => {
       mockFetchPost.mockResolvedValueOnce(newToken);
 
       // Call getValidToken multiple times simultaneously
-      const promises = [
-        service.getValidToken(),
-        service.getValidToken(),
-        service.getValidToken(),
-      ];
+      const promises = [service.getValidToken(), service.getValidToken(), service.getValidToken()];
 
       const results = await Promise.all(promises);
 
@@ -366,12 +356,8 @@ describe("LoginApiService", () => {
       const serviceWithProtected1 = service1 as LoginApiServiceWithProtected;
       const serviceWithProtected2 = service2 as LoginApiServiceWithProtected;
 
-      jest
-        .spyOn(serviceWithProtected1, "fetchPost")
-        .mockImplementation(mockFetchPost1);
-      jest
-        .spyOn(serviceWithProtected2, "fetchPost")
-        .mockImplementation(mockFetchPost2);
+      jest.spyOn(serviceWithProtected1, "fetchPost").mockImplementation(mockFetchPost1);
+      jest.spyOn(serviceWithProtected2, "fetchPost").mockImplementation(mockFetchPost2);
 
       // Expired token
       const expiredToken: LoginResponseData = {
@@ -394,9 +380,7 @@ describe("LoginApiService", () => {
       };
 
       // Mock localStorage to return expired token
-      jest
-        .spyOn(Storage.prototype, "getItem")
-        .mockReturnValue(JSON.stringify(expiredToken));
+      jest.spyOn(Storage.prototype, "getItem").mockReturnValue(JSON.stringify(expiredToken));
       jest.spyOn(Storage.prototype, "setItem").mockImplementation(() => {});
       jest.spyOn(Date, "now").mockReturnValue(expiredTokenTime);
 

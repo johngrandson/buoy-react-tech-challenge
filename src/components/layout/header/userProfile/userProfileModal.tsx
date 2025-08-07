@@ -11,11 +11,7 @@ interface UserProfileModalProps {
   closeModal: () => void;
   userData?: UserProfileData;
 }
-export const UserProfileModal = ({
-  open,
-  closeModal,
-  userData,
-}: UserProfileModalProps) => {
+export const UserProfileModal = ({ open, closeModal, userData }: UserProfileModalProps) => {
   const dispatch = useAppDispatch();
   const navigate = useAppNavigate();
 
@@ -26,20 +22,11 @@ export const UserProfileModal = ({
 
   return (
     <Modal open={open} onCancel={closeModal} footer={null} width={"800px"}>
-      <Row
-        align="middle"
-        justify="space-between"
-        wrap={false}
-        style={{ minHeight: "100px" }}
-      >
+      <Row align="middle" justify="space-between" wrap={false} style={{ minHeight: "100px" }}>
         <Col>
           <Row gutter={[16, 16]} justify="start" wrap={false}>
             <Col>
-              <Avatar
-                size={70}
-                icon={<UserOutlined />}
-                src={userData?.avatar}
-              />
+              <Avatar size={70} icon={<UserOutlined />} src={userData?.avatar} />
             </Col>
             <Col>
               <Row>

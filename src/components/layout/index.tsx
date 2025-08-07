@@ -41,8 +41,8 @@ export function AppLayout({ children }: PropsWithChildren) {
   const [sidebarItems, setSidebarItems] = useState<MenuItemType[]>([]);
 
   const addSidebarItem = (menuItem: MenuItemType) => {
-    setSidebarItems((prev) => {
-      const repeatedKey = prev.find((item) => item?.key === menuItem?.key);
+    setSidebarItems(prev => {
+      const repeatedKey = prev.find(item => item?.key === menuItem?.key);
       if (repeatedKey) return prev;
 
       return [...prev, menuItem];

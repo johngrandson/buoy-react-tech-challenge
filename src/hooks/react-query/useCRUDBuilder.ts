@@ -1,10 +1,6 @@
 import { ElementIdType, PaginatedResult } from "services/base/interface";
 import { useBrandIdSubscribedQuery } from "./useBrandIdSubscribedQuery";
-import {
-  UseMutationResult,
-  UseQueryResult,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { UseMutationResult, UseQueryResult, useQueryClient } from "@tanstack/react-query";
 import { useBrandIdSubscribedMutation } from "./useBrandIdSubscribedMutation";
 
 export interface useCRUDBuilderProps<T> {
@@ -12,41 +8,23 @@ export interface useCRUDBuilderProps<T> {
   paramlessDetail?: boolean;
   readListPromise?:
     | undefined
-    | ((
-        brandId: string,
-        ...rest: any[]
-      ) => Promise<PaginatedResult<T> | undefined>);
+    | ((brandId: string, ...rest: any[]) => Promise<PaginatedResult<T> | undefined>);
   readDetailPromise?:
     | undefined
-    | ((
-        brandId: string,
-        elementId?: ElementIdType,
-        ...rest: any[]
-      ) => Promise<T | undefined>);
-  createPromise?:
-    | undefined
-    | ((brandId: string, ...rest: any[]) => Promise<T | undefined | void>);
-  updatePromise?:
-    | undefined
-    | ((brandId: string, ...rest: any[]) => Promise<T | undefined | void>);
-  deletePromise?:
-    | undefined
-    | ((brandId: string, ...rest: any[]) => Promise<T | undefined | void>);
+    | ((brandId: string, elementId?: ElementIdType, ...rest: any[]) => Promise<T | undefined>);
+  createPromise?: undefined | ((brandId: string, ...rest: any[]) => Promise<T | undefined | void>);
+  updatePromise?: undefined | ((brandId: string, ...rest: any[]) => Promise<T | undefined | void>);
+  deletePromise?: undefined | ((brandId: string, ...rest: any[]) => Promise<T | undefined | void>);
 }
 
 export interface useCRUDBuilderResponse<T> {
   useGetList: (query?: any[]) => UseQueryResult<PaginatedResult<T> | undefined>;
-  useGetDetail: (
-    elementId?: ElementIdType,
-    query?: any[]
-  ) => UseQueryResult<T | undefined>;
+  useGetDetail: (elementId?: ElementIdType, query?: any[]) => UseQueryResult<T | undefined>;
   useCreate: () => UseMutationResult<T | undefined | void, unknown, Partial<T>>;
   useUpdate: (
     elementId: ElementIdType
   ) => UseMutationResult<T | undefined | void, unknown, Partial<T>>;
-  useDelete: (
-    elementId: ElementIdType
-  ) => UseMutationResult<T | undefined | void, unknown, void>;
+  useDelete: (elementId: ElementIdType) => UseMutationResult<T | undefined | void, unknown, void>;
 }
 
 export function useCRUDBuilder<T>({
@@ -71,18 +49,17 @@ export function useCRUDBuilder<T>({
   return {
     useGetList: (query: any[] = []) => {
       return useBrandIdSubscribedQuery<PaginatedResult<T> | undefined>(
-        async (brandId) =>
-          readListPromise && readListPromise(brandId, ...query),
+        async brandId => readListPromise && readListPromise(brandId, ...query),
         listQueryKey
       );
     },
 
     useGetDetail: (elementId?: ElementIdType) => {
       return useBrandIdSubscribedQuery<T | undefined>(
-        async (brandId) => {
+        async brandId => {
           return readDetailPromise && readDetailPromise(brandId, elementId);
         },
-        (brandId) => detailQueryKey(brandId, elementId)
+        brandId => detailQueryKey(brandId, elementId)
       );
     },
 
@@ -93,7 +70,7 @@ export function useCRUDBuilder<T>({
         async (brandId: string, body: Partial<T>) => {
           return createPromise && createPromise(brandId, body);
         },
-        (brandId) => {
+        brandId => {
           queryClient.invalidateQueries({
             queryKey: listQueryKey(brandId),
           });
@@ -109,7 +86,7 @@ export function useCRUDBuilder<T>({
           if (!elementId) return;
           return updatePromise && updatePromise(brandId, elementId, body);
         },
-        (brandId) => {
+        brandId => {
           queryClient.invalidateQueries({
             queryKey: listQueryKey(brandId),
           });
@@ -134,7 +111,7 @@ export function useCRUDBuilder<T>({
           if (!elementId) return;
           return deletePromise && deletePromise(brandId, elementId, body);
         },
-        (brandId) => {
+        brandId => {
           queryClient.invalidateQueries({
             queryKey: listQueryKey(brandId),
           });

@@ -205,7 +205,7 @@ describe("BrandProfileApiService", () => {
       const results = await Promise.all(promises);
 
       // All calls should return the same data
-      results.forEach((result) => {
+      results.forEach(result => {
         expect(result).toEqual(mockBrand);
       });
 
@@ -269,10 +269,8 @@ describe("BrandProfileApiService", () => {
       const mockGet1 = jest.fn();
       const mockGet2 = jest.fn();
 
-      const serviceWithProtected1 =
-        service1 as BrandProfileApiServiceWithProtected;
-      const serviceWithProtected2 =
-        service2 as BrandProfileApiServiceWithProtected;
+      const serviceWithProtected1 = service1 as BrandProfileApiServiceWithProtected;
+      const serviceWithProtected2 = service2 as BrandProfileApiServiceWithProtected;
 
       jest.spyOn(serviceWithProtected1, "get").mockImplementation(mockGet1);
       jest.spyOn(serviceWithProtected2, "get").mockImplementation(mockGet2);

@@ -53,11 +53,7 @@ describe("UserProfileApiService", () => {
       mockGet.mockResolvedValueOnce(userData);
 
       // Call getMyUser multiple times simultaneously
-      const promises = [
-        service.getMyUser(),
-        service.getMyUser(),
-        service.getMyUser(),
-      ];
+      const promises = [service.getMyUser(), service.getMyUser(), service.getMyUser()];
 
       const results = await Promise.all(promises);
 
@@ -81,10 +77,8 @@ describe("UserProfileApiService", () => {
     const mockGet1 = jest.fn();
     const mockGet2 = jest.fn();
 
-    const serviceWithProtected1 =
-      service1 as UserProfileApiServiceWithProtected;
-    const serviceWithProtected2 =
-      service2 as UserProfileApiServiceWithProtected;
+    const serviceWithProtected1 = service1 as UserProfileApiServiceWithProtected;
+    const serviceWithProtected2 = service2 as UserProfileApiServiceWithProtected;
 
     jest.spyOn(serviceWithProtected1, "get").mockImplementation(mockGet1);
     jest.spyOn(serviceWithProtected2, "get").mockImplementation(mockGet2);

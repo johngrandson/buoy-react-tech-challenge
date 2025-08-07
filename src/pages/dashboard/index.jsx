@@ -26,11 +26,7 @@ import {
   theme,
 } from "antd";
 import ContentLayout from "components/layout/content/contentLayout";
-import {
-  ToTopOutlined,
-  MenuUnfoldOutlined,
-  RightOutlined,
-} from "@ant-design/icons";
+import { ToTopOutlined, MenuUnfoldOutlined, RightOutlined } from "@ant-design/icons";
 import Paragraph from "antd/lib/typography/Paragraph";
 
 import Echart from "./components/chart/EChart";
@@ -56,7 +52,7 @@ function Dashboard() {
     token: { colorPrimaryBg, colorPrimaryTextActive, colorPrimary },
   } = theme.useToken();
 
-  const onChange = (e) => console.log(`radio checked:${e.target.value}`);
+  const onChange = e => console.log(`radio checked:${e.target.value}`);
 
   const [reverse, setReverse] = useState(false);
 
@@ -278,14 +274,7 @@ function Dashboard() {
       img: ava6,
       Title: "Redesign Online Store",
       bud: "$2,000",
-      progress: (
-        <Progress
-          percent={100}
-          size="small"
-          status="exception"
-          format={() => "Cancel"}
-        />
-      ),
+      progress: <Progress percent={100} size="small" status="exception" format={() => "Cancel"} />,
       member: (
         <div className="avatar-group mt-2">
           <Tooltip placement="bottom" title="Ryan Tompson">
@@ -359,15 +348,7 @@ function Dashboard() {
       >
         <Row className="rowgap-vbox" gutter={[24, 12]}>
           {count.map((c, index) => (
-            <Col
-              key={index}
-              xs={24}
-              sm={24}
-              md={12}
-              lg={6}
-              xl={6}
-              className="mb-24"
-            >
+            <Col key={index} xs={24} sm={24} md={12} lg={6} xl={6} className="mb-24">
               <Card bordered={false} className="criclebox ">
                 <div className="number">
                   <Row align="middle" gutter={[24, 12]}>
@@ -429,19 +410,12 @@ function Dashboard() {
                       <tr key={index}>
                         <td>
                           <h6>
-                            <img
-                              src={d.img}
-                              alt=""
-                              className="avatar-sm mr-10"
-                            />{" "}
-                            {d.Title}
+                            <img src={d.img} alt="" className="avatar-sm mr-10" /> {d.Title}
                           </h6>
                         </td>
                         <td>{d.member}</td>
                         <td>
-                          <span className="text-xs font-weight-bold">
-                            {d.bud}{" "}
-                          </span>
+                          <span className="text-xs font-weight-bold">{d.bud} </span>
                         </td>
                         <td>
                           <div className="percent-progress">{d.progress}</div>
@@ -453,11 +427,7 @@ function Dashboard() {
               </div>
               <div className="uploadfile shadow-none">
                 <Upload {...uploadProps}>
-                  <Button
-                    type="dashed"
-                    className="ant-full-box"
-                    icon={<ToTopOutlined />}
-                  >
+                  <Button type="dashed" className="ant-full-box" icon={<ToTopOutlined />}>
                     <Text className="click">Click to Upload</Text>
                   </Button>
                 </Upload>
@@ -472,11 +442,7 @@ function Dashboard() {
                   this month <span className="bnb2">20%</span>
                 </Paragraph>
 
-                <Timeline
-                  pending="Recording..."
-                  className="timelinelist"
-                  reverse={reverse}
-                >
+                <Timeline pending="Recording..." className="timelinelist" reverse={reverse}>
                   {timelineList.map((t, index) => (
                     <Timeline.Item color={t.color} key={index}>
                       <Title level={5}>{t.title}</Title>
@@ -484,11 +450,7 @@ function Dashboard() {
                     </Timeline.Item>
                   ))}
                 </Timeline>
-                <Button
-                  type="primary"
-                  className="width-100"
-                  onClick={() => setReverse(!reverse)}
-                >
+                <Button type="primary" className="width-100" onClick={() => setReverse(!reverse)}>
                   {<MenuUnfoldOutlined />} REVERSE
                 </Button>
               </div>
@@ -500,21 +462,14 @@ function Dashboard() {
           <Col xs={24} md={12} sm={24} lg={12} xl={14} className="mb-24">
             <Card bordered={false} className="criclebox h-full">
               <Row gutter>
-                <Col
-                  xs={24}
-                  md={12}
-                  sm={24}
-                  lg={12}
-                  xl={14}
-                  className="mobile-24"
-                >
+                <Col xs={24} md={12} sm={24} lg={12} xl={14} className="mobile-24">
                   <div className="h-full col-content p-20">
                     <div className="ant-muse">
                       <Text>Built by developers</Text>
                       <Title level={5}>Muse Dashboard for Ant Design</Title>
                       <Paragraph className="lastweek mb-36">
-                        From colors, cards, typography to complex elements, you
-                        will find the full documentation.
+                        From colors, cards, typography to complex elements, you will find the full
+                        documentation.
                       </Paragraph>
                     </div>
                     <div className="card-footer">
@@ -525,14 +480,7 @@ function Dashboard() {
                     </div>
                   </div>
                 </Col>
-                <Col
-                  xs={24}
-                  md={12}
-                  sm={24}
-                  lg={12}
-                  xl={10}
-                  className="col-img"
-                >
+                <Col xs={24} md={12} sm={24} lg={12} xl={10} className="col-img">
                   <div className="ant-cret text-right">
                     <img src={card} alt="" className="border10" />
                   </div>
@@ -547,8 +495,8 @@ function Dashboard() {
                 <div className="card-content">
                   <Title level={5}>Work with the best</Title>
                   <p>
-                    Wealth creation is an evolutionarily recent positive-sum
-                    game. It is all about who take the opportunity first.
+                    Wealth creation is an evolutionarily recent positive-sum game. It is all about
+                    who take the opportunity first.
                   </p>
                 </div>
                 <div className="card-footer">
