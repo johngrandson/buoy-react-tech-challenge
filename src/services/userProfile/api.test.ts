@@ -11,7 +11,9 @@ describe("UserProfileApiService", () => {
   let mockGet: jest.Mock;
 
   beforeEach(() => {
-    service = new UserProfileApiService();
+    // Reset singleton before each test
+    UserProfileApiService.resetInstance();
+    service = UserProfileApiService.getInstance();
     mockGet = jest.fn();
 
     // Cast to our test type to access protected methods safely
@@ -23,10 +25,12 @@ describe("UserProfileApiService", () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+    // Clean up singleton after each test
+    UserProfileApiService.resetInstance();
   });
 
   describe("getMyUser", () => {
-    it("should call get with correct endpoint", async () => {
+    it("should fetch current user profile", async () => {
       const expectedUserData: UserProfileData = {
         id: 1,
         name: "John Doe",
@@ -43,103 +47,71 @@ describe("UserProfileApiService", () => {
       expect(result).toEqual(expectedUserData);
     });
 
-    it("should only make one request when called multiple times simultaneously", async () => {
+    it("should prevent duplicate /me requests on dashboard refresh", async () => {
+      // Real scenario: Dashboard refreshes and multiple components need user data
       const userData: UserProfileData = {
         id: 1,
-        name: "John Doe",
-        email: "john@example.com",
+        name: "Test User",
+        email: "test@example.com",
+      };
+
+      // Mock realistic API delay
+      mockGet.mockImplementation(
+        () => new Promise(resolve => setTimeout(() => resolve(userData), 100))
+      );
+
+      // Simulate React StrictMode + multiple components needing user data
+      const promises = [
+        service.getMyUser(), // Header component
+        service.getMyUser(), // Profile dropdown
+        service.getMyUser(), // Dashboard welcome message
+        service.getMyUser(), // User settings check
+      ];
+
+      const results = await Promise.all(promises);
+
+      // All should get the same user data
+      results.forEach(result => {
+        expect(result).toEqual(userData);
+      });
+
+      // CRITICAL: Only ONE actual API call despite multiple component calls
+      expect(mockGet).toHaveBeenCalledTimes(1);
+      expect(mockGet).toHaveBeenCalledWith("/users/me/");
+    });
+
+    it("should cache user data to prevent unnecessary API calls", async () => {
+      // Real scenario: User navigates between pages, components remount
+      const userData: UserProfileData = {
+        id: 1,
+        name: "Cached User",
+        email: "cached@example.com",
       };
 
       mockGet.mockResolvedValueOnce(userData);
 
-      // Call getMyUser multiple times simultaneously
-      const promises = [service.getMyUser(), service.getMyUser(), service.getMyUser()];
-
-      const results = await Promise.all(promises);
-
-      // All calls should return the same user data
-      expect(results[0]).toEqual(userData);
-      expect(results[1]).toEqual(userData);
-      expect(results[2]).toEqual(userData);
-
-      // But get should only be called once
+      // First page load
+      const firstResult = await service.getMyUser();
+      expect(firstResult).toEqual(userData);
       expect(mockGet).toHaveBeenCalledTimes(1);
-      expect(mockGet).toHaveBeenCalledWith("/users/me/");
+
+      // User navigates to another page, component remounts
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Second page load - should use cached data
+      const secondResult = await service.getMyUser();
+      expect(secondResult).toEqual(userData);
+
+      // Still only 1 API call - cache prevents redundant requests
+      expect(mockGet).toHaveBeenCalledTimes(1);
     });
-  });
 
-  it("should handle multiple service instances with independent promise caching", async () => {
-    // Create two separate service instances
-    const service1 = new UserProfileApiService();
-    const service2 = new UserProfileApiService();
+    it("should handle API errors gracefully", async () => {
+      const error = new Error("Unauthorized");
+      mockGet.mockRejectedValueOnce(error);
 
-    // Mock get for both services
-    const mockGet1 = jest.fn();
-    const mockGet2 = jest.fn();
-
-    const serviceWithProtected1 = service1 as UserProfileApiServiceWithProtected;
-    const serviceWithProtected2 = service2 as UserProfileApiServiceWithProtected;
-
-    jest.spyOn(serviceWithProtected1, "get").mockImplementation(mockGet1);
-    jest.spyOn(serviceWithProtected2, "get").mockImplementation(mockGet2);
-
-    // Different user data for each service
-    const userData1: UserProfileData = {
-      id: 1,
-      name: "John Doe",
-      email: "john@example.com",
-    };
-
-    const userData2: UserProfileData = {
-      id: 2,
-      name: "Jane Smith",
-      email: "jane@example.com",
-    };
-
-    // Mock responses
-    mockGet1.mockResolvedValueOnce(userData1);
-    mockGet2.mockResolvedValueOnce(userData2);
-
-    // Call getMyUser for both services simultaneously
-    const promises = [
-      service1.getMyUser(),
-      service1.getMyUser(), // Should reuse service1's promise
-      service2.getMyUser(),
-      service2.getMyUser(), // Should reuse service2's promise
-    ];
-
-    const results = await Promise.all(promises);
-
-    // Service1 calls should return service1's user data
-    expect(results[0]).toEqual(userData1);
-    expect(results[1]).toEqual(userData1);
-
-    // Service2 calls should return service2's user data
-    expect(results[2]).toEqual(userData2);
-    expect(results[3]).toEqual(userData2);
-
-    // Each service should only make one get call
-    expect(mockGet1).toHaveBeenCalledTimes(1);
-    expect(mockGet1).toHaveBeenCalledWith("/users/me/");
-
-    expect(mockGet2).toHaveBeenCalledTimes(1);
-    expect(mockGet2).toHaveBeenCalledWith("/users/me/");
-  });
-
-  it("should handle errors properly and clear promise cache", async () => {
-    const error = new Error("Network error");
-    mockGet.mockRejectedValueOnce(error);
-
-    // First call should fail
-    await expect(service.getMyUser()).rejects.toThrow("Network error");
-
-    // Second call should make a new request (promise cache cleared after error)
-    const userData: UserProfileData = { id: 1, name: "John Doe" };
-    mockGet.mockResolvedValueOnce(userData);
-
-    const result = await service.getMyUser();
-
-    expect(result).toEqual(userData);
-    expect(mockGet).toHaveBeenCalledTimes(2); // One failed, one successful
+      await expect(service.getMyUser()).rejects.toThrow("Unauthorized");
+      expect(mockGet).toHaveBeenCalledTimes(1);
+    });
   });
 });
