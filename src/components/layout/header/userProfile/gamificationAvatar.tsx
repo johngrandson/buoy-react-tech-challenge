@@ -5,10 +5,7 @@ interface GamificationAvatarProps {
   label?: string;
 }
 
-export function GamificationAvatar({
-  src,
-  label = "",
-}: GamificationAvatarProps) {
+export function GamificationAvatar({ src, label = "" }: GamificationAvatarProps) {
   const {
     token: { controlHeight },
   } = theme.useToken();
@@ -21,6 +18,7 @@ export function GamificationAvatar({
             padding: 1,
             height: controlHeight * 1.5,
           }}
+          alt="Gamification avatar"
         />
       </Col>
       <Col span={18}>

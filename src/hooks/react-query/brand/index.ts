@@ -6,7 +6,7 @@ import { ElementIdType } from "services/base/interface";
 export const useBrandCRUD = () =>
   useCRUDBuilder<BrandProfileData>({
     cacheQueryName: "brand",
-    readListPromise: (brandId: string) => BrandService.getAll(),
+    readListPromise: () => BrandService.getAll(),
     readDetailPromise: (brandId: string) => BrandService.getById(brandId),
     updatePromise: (
       brandId: ElementIdType,

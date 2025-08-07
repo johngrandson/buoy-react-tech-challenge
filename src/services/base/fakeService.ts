@@ -6,9 +6,7 @@ import { PaginatedResult } from "./interface";
  * @export
  * @class FakeService
  */
-export default class FakeService<
-  R extends Record<string, any>
-> extends AuthedService {
+export default class FakeService<R extends Record<string, any>> extends AuthedService {
   _latencyDuration = 0;
   _errorProbability = 0;
 
@@ -72,11 +70,8 @@ export default class FakeService<
     });
   }
 
-  protected fakePagination = (
-    data: R,
-    numberOfEntries = 10
-  ): PaginatedResult<R> => ({
-    list: Array.from({ length: numberOfEntries }, (_, i) => i + 1).map((i) => ({
+  protected fakePagination = (data: R, numberOfEntries = 10): PaginatedResult<R> => ({
+    list: Array.from({ length: numberOfEntries }, (_, i) => i + 1).map(i => ({
       ...data,
       id: i,
       name: `${data?.name}_${i}`,
@@ -85,24 +80,4 @@ export default class FakeService<
     nextCursor: "",
     prevCursor: "",
   });
-
-  private buildApiSuccess = (data: any, status = 200) => {
-    return data;
-  };
-
-  /**
-   * TEMP
-   *
-   * @param {*} status
-   * @param {*} property
-   * @param {*} message
-   * @return {*}  {ApiError}
-   */
-  private buildApiError = (
-    status: string,
-    property: string,
-    message: string
-  ) => {
-    return { error: { status, property, message } };
-  };
 }

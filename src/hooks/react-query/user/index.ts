@@ -7,8 +7,7 @@ export const useUserCRUD = () =>
   useCRUDBuilder<UserProfileData>({
     cacheQueryName: "my_user",
     paramlessDetail: true,
-    readDetailPromise: (brandId: ElementIdType) =>
-      UserProfileService.getMyUser(),
+    readDetailPromise: () => UserProfileService.getMyUser(),
     updatePromise: (
       brandId: ElementIdType,
       elementId: ElementIdType,
