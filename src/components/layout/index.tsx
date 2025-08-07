@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, useState } from "react";
-import { Col, Layout, Row, theme } from "antd";
+import { Layout, theme } from "antd";
 import { AppHeader } from "./header";
 import { AppSidebar } from "./sidebar";
 import { MenuItemType } from "antd/es/menu/hooks/useItems";
@@ -11,6 +11,7 @@ export enum AppPath {
   brandProfile = "/brandProfile",
   userProfile = "/profile",
   crud = "/",
+  users = "/users",
 }
 
 export type AppLayoutContextType = {
