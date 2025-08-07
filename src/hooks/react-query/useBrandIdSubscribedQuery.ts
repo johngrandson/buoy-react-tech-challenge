@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { QueryKey, UseQueryResult, useQuery } from "@tanstack/react-query";
 import { useGetBrandId } from "hooks";
 
@@ -15,13 +14,8 @@ export function useBrandIdSubscribedQuery<T>(
       return response;
     },
     queryKey: queryKeyBuilder(brandId),
+    enabled: !!brandId,
   });
-
-  useEffect(() => {
-    if (brandId) {
-      query.refetch();
-    }
-  }, [brandId]);
 
   return query;
 }
