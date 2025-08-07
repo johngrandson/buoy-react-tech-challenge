@@ -146,7 +146,75 @@ Reference:
 
 ---
 
-> EXTRA POINTS: WRITE HERE ANY EXTRA COMMENTS OR NOTES YOU FIND RELEVANT
+### Comments and extra points
+
+### Architectural Approach: Feature-Based Domain-Driven Design
+
+Based on my last experiences with other projects, when I want to build an application that will need to scale in terms of performance and team collaboration, I follow a Domain-Driven Design (DDD) approach adapted for frontend development, organizing code by business features rather than technical layers.
+This pattern offers significant advantages over traditional module-based architectures.
+
+### Key Benefits
+
+1. Reduced Coupling and Enhanced Cohesion
+By isolating each feature in its own directory, we achieve high cohesion within features while minimizing cross-feature dependencies. This
+makes the codebase more maintainable and reduces the risk of unintended side effects when modifying features.
+
+2. Improved Developer Experience
+- Discoverability: New developers can quickly understand what the application does by browsing the feature folders
+- Context Locality: All related code (components, hooks, services, types) lives together, reducing cognitive load
+- Clear Boundaries: Each feature explicitly defines its public API through barrel exports (index.ts)
+
+3. Scalability and Team Collaboration
+- Parallel Development: Teams can work on different features independently with minimal merge conflicts
+- Microservices-Ready: Features can be easily extracted into micro-frontends or separate packages
+- Code Ownership: Clear feature boundaries enable team-based ownership models
+
+### Monorepo Evolution Path
+
+As the project scales, the chosen architecture naturally evolves into a monorepo structure:
+
+- packages/
+  - shared/           # Shared utilities, design system, common hooks
+  - features/         # Individual feature packages
+    - users/
+      - components/
+      - hooks/
+      - services/
+      - types/
+      - utils/
+    - brands/
+      - components/
+      - hooks/
+      - services/
+      - types/
+      - utils/
+  - apps/            # Different application shells
+    - main-app/
+    - admin-portal/
+
+
+### Business Logic Clarity
+
+The feature-based structure creates a ubiquitous language between developers and domain experts:
+- Business entities map directly to code organization
+- Feature folders reflect actual business capabilities
+- TypeScript schemas serve as living documentation of domain models
+- The hierarchy mirrors business relationships and workflows
+
+### React-Specific Advantages
+
+Component Reusability: Feature-specific components remain close to their context while truly reusable components live in the shared library,
+making the distinction clear.
+
+State Management: Each feature can own its state slice, whether using Redux, Zustand, or Context API, preventing global state pollution.
+
+Testing Strategy: Feature isolation enables focused testing strategies - unit tests for shared utilities, integration tests for features, and
+E2E tests for critical user journeys.
+
+Bundle Optimization: Modern bundlers can leverage this structure for automatic code-splitting by feature, improving initial load times.
+
+This architectural approach transforms the codebase from a technical grouping into a business-aligned structure, making it easier to reason
+about, maintain, and evolve as requirements change.
 
 ---
 
