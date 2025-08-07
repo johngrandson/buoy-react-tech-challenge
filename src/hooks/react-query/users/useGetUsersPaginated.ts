@@ -1,5 +1,4 @@
-import { useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import UsersService from "services/users";
 import { UsersResponse } from "services/users/interface";
 
@@ -16,7 +15,6 @@ export function useGetUsersPaginated({
   hasPreviousPage: boolean;
   totalPages: number;
 } {
-  const queryClient = useQueryClient();
   const skip = (page - 1) * pageSize;
 
   const queryResult = useQuery({
@@ -30,18 +28,6 @@ export function useGetUsersPaginated({
   const totalPages = data ? Math.ceil(data.total / pageSize) : 0;
   const hasNextPage = page < totalPages;
   const hasPreviousPage = page > 1;
-
-  // Prefetch next page for better performance
-  useEffect(() => {
-    if (data && hasNextPage) {
-      const nextSkip = page * pageSize;
-      queryClient.prefetchQuery({
-        queryKey: ["users", "paginated", page + 1, pageSize],
-        queryFn: () => UsersService.getAll({ limit: pageSize, skip: nextSkip }),
-        staleTime: 5000,
-      });
-    }
-  }, [data, hasNextPage, page, pageSize, queryClient]);
 
   return {
     ...queryResult,
